@@ -1,0 +1,403 @@
+/* ══════════════════════════════════════════
+   How-To Page Styles
+   ══════════════════════════════════════════ */
+
+/* Header */
+.backButton {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.backButton:hover {
+  background: var(--gray-100);
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  padding: 36px 24px 28px;
+  text-align: center;
+  color: white;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.heroDecorativeCircle1 {
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+
+.heroDecorativeCircle2 {
+  position: absolute;
+  bottom: -40px;
+  left: -50px;
+  width: 150px;
+  height: 150px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.heroEmoji {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.heroTitle {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.heroSubtitle {
+  font-size: 0.9rem;
+  opacity: 0.92;
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════════════════
+   Steps Timeline
+   ══════════════════════════════════════════ */
+.timeline {
+  position: relative;
+  padding-left: 76px;
+  animation: fadeInUp 0.6s ease-out 0.15s both;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 29px;
+  top: 30px;
+  bottom: 30px;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--coral-400) 0%,
+    var(--lavender-400) 50%,
+    var(--mint-400) 100%
+  );
+  border-radius: 1px;
+}
+
+.step {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.step:last-child {
+  margin-bottom: 0;
+}
+
+.stepBadge {
+  position: absolute;
+  left: -76px;
+  top: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: white;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: popIn 0.5s ease-out both;
+}
+
+.stepBadgeCoral {
+  background: linear-gradient(135deg, var(--coral-400), var(--coral-500));
+  animation-delay: 0.2s;
+}
+
+.stepBadgeLavender {
+  background: linear-gradient(135deg, var(--lavender-400), var(--lavender-500));
+  animation-delay: 0.4s;
+}
+
+.stepBadgeMint {
+  background: linear-gradient(135deg, var(--mint-400), var(--mint-500));
+  animation-delay: 0.6s;
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: 10px;
+  padding-top: 16px;
+}
+
+.stepCard {
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  background: var(--warm-white);
+  box-shadow: var(--shadow-card);
+  border-left: 3px solid transparent;
+}
+
+.stepCardCoral {
+  border-left-color: var(--coral-400);
+}
+
+.stepCardMint {
+  border-left-color: var(--mint-400);
+}
+
+.stepCardText {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  line-height: 1.6;
+}
+
+/* Step 2 Sub-cards */
+.subCards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.subCard {
+  border-radius: var(--radius-md);
+  padding: 14px;
+  background: var(--warm-white);
+  box-shadow: var(--shadow-card);
+}
+
+.subCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.subCardEmoji {
+  font-size: 1.1rem;
+}
+
+.subCardTitle {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.subCardDesc {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+/* Chat Preview Bubble */
+.chatPreview {
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--gray-700);
+  background: var(--soft-ivory);
+  border: 1px solid var(--gray-200);
+}
+
+/* ══════════════════════════════════════════
+   Chat Mockup
+   ══════════════════════════════════════════ */
+.chatMockup {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.chatMockupHeader {
+  background: var(--gray-100);
+  padding: 10px 16px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chatMockupBody {
+  background: var(--cream);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* User message - LINE green bubble, right-aligned */
+.chatBubbleUser {
+  align-self: flex-end;
+  max-width: 80%;
+  background: var(--line-green);
+  color: white;
+  border-radius: 18px 18px 4px 18px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* AI narration - italic, coral-bordered, ivory background */
+.chatBubbleNarration {
+  align-self: flex-start;
+  max-width: 85%;
+  background: var(--soft-ivory);
+  border-left: 3px solid var(--coral-300);
+  border-radius: 4px 18px 18px 4px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+
+/* AI dialogue - white bubble, left-aligned */
+.chatBubbleAi {
+  align-self: flex-start;
+  max-width: 80%;
+  background: white;
+  border-radius: 4px 18px 18px 18px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--gray-800);
+  line-height: 1.5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ══════════════════════════════════════════
+   Tips Section
+   ══════════════════════════════════════════ */
+.tipsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.tipCard {
+  border-radius: var(--radius-lg);
+  padding: 18px 14px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.tipCard:hover {
+  transform: translateY(-2px);
+}
+
+.tipCardLavender {
+  background: linear-gradient(135deg, var(--lavender-50) 0%, var(--lavender-100) 100%);
+}
+
+.tipCardMint {
+  background: linear-gradient(135deg, var(--mint-50) 0%, var(--mint-100) 100%);
+}
+
+.tipCardCoral {
+  background: linear-gradient(135deg, var(--coral-50) 0%, var(--coral-100) 100%);
+}
+
+.tipCardMixed {
+  background: linear-gradient(135deg, var(--lavender-50) 0%, var(--coral-50) 100%);
+}
+
+.tipEmoji {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.tipTitle {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  line-height: 1.4;
+}
+
+/* ══════════════════════════════════════════
+   CTA Section
+   ══════════════════════════════════════════ */
+.ctaSection {
+  border-radius: var(--radius-xl);
+  padding: 32px 24px;
+  text-align: center;
+  color: white;
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+}
+
+.ctaTitle {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.ctaSubtitle {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 20px;
+}
+
+.ctaButton {
+  display: inline-block;
+  background: white;
+  color: var(--coral-500);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 14px 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+}
+
+.ctaButton:active {
+  transform: scale(0.98);
+}

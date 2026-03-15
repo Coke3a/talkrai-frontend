@@ -1,16 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Quicksand, Plus_Jakarta_Sans, IBM_Plex_Sans_Thai } from "next/font/google";
 import { LiffProvider } from "./providers/liff-provider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const quicksand = Quicksand({
+  variable: "--font-quicksand",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
+
+const ibmPlexSansThai = IBM_Plex_Sans_Thai({
+  variable: "--font-ibm-thai",
+  subsets: ["thai"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -36,9 +44,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="th">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${quicksand.variable} ${plusJakartaSans.variable} ${ibmPlexSansThai.variable} antialiased`}
       >
         <LiffProvider>{children}</LiffProvider>
       </body>
