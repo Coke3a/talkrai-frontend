@@ -1,23 +1,13 @@
-"use client";
-
-import { useRouter } from "next/navigation";
 import styles from "./how-to.module.css";
+import { BackButton } from "./back-button";
 
 export default function HowToPage() {
-  const router = useRouter();
-
   return (
     <div className="page-wrapper">
       {/* Header */}
       <header className="page-header">
         <div className="header-inner relative">
-          <button
-            className={styles.backButton}
-            onClick={() => router.back()}
-            aria-label="Go back"
-          >
-            ←
-          </button>
+          <BackButton className={styles.backButton} />
           <h1 className="header-title font-thai">วิธีเล่น</h1>
         </div>
       </header>

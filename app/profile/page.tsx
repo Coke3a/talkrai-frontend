@@ -1,17 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLiff } from "@/app/providers/liff-provider";
+import { fetchProfile, type ProfileStats } from "@/app/lib/api";
 import styles from "./profile.module.css";
 
-// Mock data — will be replaced with real LIFF profile + API data
-const MOCK_PROFILE = {
-  displayName: "Sakura_fan_01",
-  pictureUrl:
-    "https://api.dicebear.com/9.x/adventurer/svg?seed=Sakura_fan_01",
-  createdAt: "2025-03-01",
-  totalSessions: 12,
-  totalMessages: 847,
-};
+interface LineProfile {
+  displayName: string;
+  pictureUrl?: string;
+}
 
 function formatMemberSince(dateStr: string): string {
   const date = new Date(dateStr);
@@ -22,17 +19,35 @@ function formatMemberSince(dateStr: string): string {
 }
 
 export default function ProfilePage() {
-  const { isReady, liffError } = useLiff();
+  const { isReady, liffError, liff } = useLiff();
+  const [lineProfile, setLineProfile] = useState<LineProfile | null>(null);
+  const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const {
-    displayName,
-    pictureUrl,
-    createdAt,
-    totalSessions,
-    totalMessages,
-  } = MOCK_PROFILE;
+  useEffect(() => {
+    if (!isReady || !liff || liffError) return;
 
-  if (!isReady) {
+    const loadData = async () => {
+      try {
+        const [profile, profileStats] = await Promise.all([
+          liff.getProfile(),
+          fetchProfile(),
+        ]);
+
+        setLineProfile({
+          displayName: profile.displayName,
+          pictureUrl: profile.pictureUrl,
+        });
+        setStats(profileStats);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
+      }
+    };
+
+    loadData();
+  }, [isReady, liff, liffError]);
+
+  if (!isReady || (!lineProfile && !error && !liffError)) {
     return (
       <div className="page-wrapper">
         <div className="flex min-h-screen items-center justify-center">
@@ -45,7 +60,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (liffError) {
+  if (liffError || error) {
     return (
       <div className="page-wrapper">
         <div className="flex min-h-screen items-center justify-center px-6">
@@ -54,19 +69,29 @@ export default function ProfilePage() {
             <h1 className="font-display mb-2 text-xl font-semibold text-tgray-900">
               เกิดข้อผิดพลาด
             </h1>
-            <p className="font-thai text-sm text-tgray-500">{liffError}</p>
+            <p className="font-thai text-sm text-tgray-500">
+              {liffError || error}
+            </p>
           </div>
         </div>
       </div>
     );
   }
 
+  const displayName = lineProfile?.displayName ?? "User";
+  const pictureUrl =
+    lineProfile?.pictureUrl ??
+    `https://api.dicebear.com/9.x/adventurer/svg?seed=${displayName}`;
+  const createdAt = stats?.created_at ?? new Date().toISOString();
+  const totalSessions = stats?.total_sessions ?? 0;
+  const totalMessages = stats?.total_messages ?? 0;
+
   return (
     <div className="page-wrapper">
       {/* Header */}
       <header className="page-header">
         <div className="header-inner">
-          <h1 className="header-title">Profile</h1>
+          <h1 className="header-title">โปรไฟล์</h1>
         </div>
       </header>
 
@@ -103,7 +128,7 @@ export default function ProfilePage() {
 
         {/* Stats Grid */}
         <div className="mb-6 mt-6">
-          <span className="section-label">Your Stats</span>
+          <span className="section-label">สถิติของคุณ</span>
           <div className={styles.statsGrid}>
             <div className={`card ${styles.statCard}`}>
               <div
@@ -112,7 +137,7 @@ export default function ProfilePage() {
                 📖
               </div>
               <div className={styles.statValue}>{totalSessions}</div>
-              <div className={styles.statLabel}>Total Stories</div>
+              <div className={styles.statLabel}>เรื่องราวทั้งหมด</div>
             </div>
 
             <div className={`card ${styles.statCard}`}>
@@ -122,14 +147,14 @@ export default function ProfilePage() {
                 💬
               </div>
               <div className={styles.statValue}>{totalMessages}</div>
-              <div className={styles.statLabel}>Messages</div>
+              <div className={styles.statLabel}>ข้อความ</div>
             </div>
           </div>
         </div>
 
         {/* LINE Status */}
         <div className="mb-6">
-          <span className="section-label">Connection</span>
+          <span className="section-label">การเชื่อมต่อ</span>
           <div
             className={styles.lineStatus}
             style={{
@@ -156,7 +181,7 @@ export default function ProfilePage() {
         >
           <span className={styles.gratitudeIcon}>✨</span>
           <h3 className={styles.gratitudeTitle}>
-            Thank you for being part of TalkRai!
+            ขอบคุณที่เป็นส่วนหนึ่งของ TalkRai!
           </h3>
           <p className={`font-thai ${styles.gratitudeText}`}>
             ขอบคุณที่เป็นส่วนหนึ่งของ TalkRai

@@ -1,34 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useLiff } from "@/app/providers/liff-provider";
+import {
+  fetchCreditBalance,
+  fetchCreditTransactions,
+  formatDate,
+  type CreditBalance,
+  type TransactionItem,
+} from "@/app/lib/api";
 import styles from "./credits.module.css";
 
-// ── Mock Data ──────────────────────────────────────────────
+// ── Constants (product config, not user data) ────────────
 
-const CREDIT_BALANCE = 66;
-const TOTAL_PURCHASED = 200;
-const TOTAL_CONSUMED = 134;
 const CREDITS_PER_MESSAGE = 2;
 const LOW_BALANCE_THRESHOLD = 20;
-
-interface Transaction {
-  type: "consume" | "purchase" | "welcome_bonus";
-  amount: number;
-  balance_after: number;
-  description: string;
-  created_at: string;
-}
-
-const TRANSACTIONS: Transaction[] = [
-  { type: "consume", amount: -2, balance_after: 66, description: "แชทกับมิโอะ · คาเฟ่ริมทาง", created_at: "2025-03-06T14:30:00" },
-  { type: "consume", amount: -2, balance_after: 68, description: "แชทกับมิโอะ · คาเฟ่ริมทาง", created_at: "2025-03-06T14:28:00" },
-  { type: "consume", amount: -2, balance_after: 70, description: "แชทกับมิโอะ · คาเฟ่ริมทาง", created_at: "2025-03-06T14:25:00" },
-  { type: "purchase", amount: 150, balance_after: 72, description: "เติมเครดิต ✨ สายฟิน", created_at: "2025-03-05T10:00:00" },
-  { type: "consume", amount: -2, balance_after: -78, description: "แชทกับอากิระ · สวนสาธารณะ", created_at: "2025-03-04T20:15:00" },
-  { type: "consume", amount: -2, balance_after: -76, description: "แชทกับอากิระ · สวนสาธารณะ", created_at: "2025-03-04T20:10:00" },
-  { type: "purchase", amount: 50, balance_after: -74, description: "เติมเครดิต ☕ ลองเลย", created_at: "2025-03-02T09:00:00" },
-  { type: "welcome_bonus", amount: 20, balance_after: -94, description: "โบนัสต้อนรับ — ยินดีต้อนรับสู่ TalkRai! 🎉", created_at: "2025-03-01T12:00:00" },
-];
+const PAGE_SIZE = 5;
 
 const PACKAGES = [
   {
@@ -59,53 +46,114 @@ const PACKAGES = [
   },
 ];
 
-// ── Thai Date Helpers ──────────────────────────────────────
-
-const THAI_MONTHS = [
-  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
-  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.",
-];
-
-function formatThaiDate(isoString: string): string {
-  const date = new Date(isoString);
-  const day = date.getDate();
-  const month = THAI_MONTHS[date.getMonth()];
-  const buddhistYear = date.getFullYear() + 543;
-  const shortYear = String(buddhistYear).slice(-2);
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${day} ${month} ${shortYear} · ${hours}:${minutes}`;
-}
-
 // ── Transaction Helpers ────────────────────────────────────
 
-function getTransactionLabel(type: Transaction["type"]): string {
+function getTransactionLabel(type: string): string {
   switch (type) {
-    case "consume": return "ใช้เครดิต";
+    case "consumption": return "ใช้เครดิต";
     case "purchase": return "เติมเครดิต";
-    case "welcome_bonus": return "โบนัสต้อนรับ";
+    case "bonus": return "โบนัส";
+    case "refund": return "คืนเครดิต";
+    case "adjustment": return "ปรับปรุง";
+    default: return type;
   }
 }
 
-function getTransactionIcon(type: Transaction["type"]): string {
+function getTransactionIcon(type: string): string {
   switch (type) {
-    case "consume": return "💬";
+    case "consumption": return "💬";
     case "purchase": return "💳";
-    case "welcome_bonus": return "🎁";
+    case "bonus": return "🎁";
+    case "refund": return "↩️";
+    case "adjustment": return "🔧";
+    default: return "📝";
   }
 }
 
-function isPositive(type: Transaction["type"]): boolean {
-  return type === "purchase" || type === "welcome_bonus";
+function isPositive(type: string): boolean {
+  return type !== "consumption";
 }
 
 // ── Component ──────────────────────────────────────────────
 
 export default function CreditsPage() {
-  const [visibleCount, setVisibleCount] = useState(5);
-  const isLowBalance = CREDIT_BALANCE < LOW_BALANCE_THRESHOLD;
-  const visibleTransactions = TRANSACTIONS.slice(0, visibleCount);
-  const hasMore = visibleCount < TRANSACTIONS.length;
+  const { isReady, liff, liffError } = useLiff();
+  const [balance, setBalance] = useState<CreditBalance | null>(null);
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
+  const [totalTransactions, setTotalTransactions] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isReady || !liff || liffError) return;
+
+    const loadData = async () => {
+      try {
+        const [balanceData, txData] = await Promise.all([
+          fetchCreditBalance(),
+          fetchCreditTransactions(PAGE_SIZE, 0),
+        ]);
+        setBalance(balanceData);
+        setTransactions(txData.transactions);
+        setTotalTransactions(txData.total);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [isReady, liff, liffError]);
+
+  const loadMore = useCallback(async () => {
+    try {
+      const txData = await fetchCreditTransactions(
+        PAGE_SIZE,
+        transactions.length
+      );
+      setTransactions((prev) => [...prev, ...txData.transactions]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
+    }
+  }, [transactions.length]);
+
+  if (!isReady || loading) {
+    return (
+      <div className="page-wrapper">
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="animate-pulse text-center">
+            <div className="mb-3 text-4xl">💰</div>
+            <p className="font-thai text-sm text-tgray-500">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (liffError || error) {
+    return (
+      <div className="page-wrapper">
+        <div className="flex min-h-screen items-center justify-center px-6">
+          <div className="card rounded-[var(--radius-xl)] p-8 text-center">
+            <div className="mb-4 text-4xl">😢</div>
+            <h1 className="font-display mb-2 text-xl font-semibold text-tgray-900">
+              เกิดข้อผิดพลาด
+            </h1>
+            <p className="font-thai text-sm text-tgray-500">
+              {liffError || error}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const creditBalance = balance?.balance ?? 0;
+  const totalPurchased = balance?.total_purchased ?? 0;
+  const totalConsumed = balance?.total_consumed ?? 0;
+  const isLowBalance = creditBalance < LOW_BALANCE_THRESHOLD;
+  const hasMore = transactions.length < totalTransactions;
 
   return (
     <div className="page-wrapper">
@@ -134,7 +182,7 @@ export default function CreditsPage() {
 
           <div className="relative z-10">
             <p className={`${styles.heroLabel} font-thai`}>เครดิตคงเหลือ</p>
-            <p className={styles.heroBalance}>{CREDIT_BALANCE}</p>
+            <p className={styles.heroBalance}>{creditBalance}</p>
             <p className={`${styles.heroUnit} font-thai`}>เครดิต</p>
             <p className={`${isLowBalance ? styles.heroNoteWarning : styles.heroNote} font-thai`}>
               {isLowBalance && "⚠️ "}ใช้ {CREDITS_PER_MESSAGE} เครดิตต่อข้อความ
@@ -143,11 +191,11 @@ export default function CreditsPage() {
             <div className={styles.statPills}>
               <div className={styles.statPill}>
                 <span className={styles.statPillEmoji}>🌿</span>
-                <span className="font-thai">เติมแล้ว {TOTAL_PURCHASED}</span>
+                <span className="font-thai">เติมแล้ว {totalPurchased}</span>
               </div>
               <div className={styles.statPill}>
                 <span className={styles.statPillEmoji}>💬</span>
-                <span className="font-thai">ใช้แล้ว {TOTAL_CONSUMED}</span>
+                <span className="font-thai">ใช้แล้ว {totalConsumed}</span>
               </div>
             </div>
           </div>
@@ -167,14 +215,20 @@ export default function CreditsPage() {
         <div className="mt-8">
           <span className="section-label">ประวัติธุรกรรม</span>
           <div className={styles.transactionList}>
-            {visibleTransactions.map((tx, i) => (
-              <TransactionRow key={i} tx={tx} />
-            ))}
+            {transactions.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="font-thai text-sm text-tgray-400">ยังไม่มีธุรกรรม</p>
+              </div>
+            ) : (
+              transactions.map((tx, i) => (
+                <TransactionRow key={`${tx.created_at}-${tx.amount}-${i}`} tx={tx} />
+              ))
+            )}
 
             {hasMore && (
               <button
                 className={`${styles.loadMoreBtn} font-thai`}
-                onClick={() => setVisibleCount((c) => c + 5)}
+                onClick={loadMore}
               >
                 โหลดเพิ่มเติม
               </button>
@@ -268,12 +322,12 @@ function PackageCard({
 
 // ── Transaction Row ────────────────────────────────────────
 
-function TransactionRow({ tx }: { tx: Transaction }) {
+function TransactionRow({ tx }: { tx: TransactionItem }) {
   const positive = isPositive(tx.type);
   const icon = getTransactionIcon(tx.type);
   const label = getTransactionLabel(tx.type);
   const sign = positive ? "+" : "";
-  const thaiDate = formatThaiDate(tx.created_at);
+  const dateStr = formatDate(tx.created_at);
 
   return (
     <div
@@ -290,7 +344,7 @@ function TransactionRow({ tx }: { tx: Transaction }) {
       </div>
       <div className={styles.transactionInfo}>
         <p className={`${styles.transactionType} font-thai`}>{label}</p>
-        <p className={`${styles.transactionDesc} font-thai`}>{tx.description}</p>
+        <p className={`${styles.transactionDesc} font-thai`}>{tx.description ?? ""}</p>
       </div>
       <div className={styles.transactionRight}>
         <p
@@ -302,7 +356,7 @@ function TransactionRow({ tx }: { tx: Transaction }) {
         </p>
         <p className={`${styles.transactionMeta} font-thai`}>
           คงเหลือ {tx.balance_after}<br />
-          {thaiDate}
+          {dateStr}
         </p>
       </div>
     </div>

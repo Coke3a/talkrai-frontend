@@ -1,10 +1,11 @@
 "use client";
 
-import liff, { Liff } from "@line/liff";
+import type { Liff } from "@line/liff";
 import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -28,42 +29,49 @@ const LiffContext = createContext<LiffContextType>({
 export function LiffProvider({ children }: { children: ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isInClient, setIsInClient] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  useEffect(() => {
-    const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
-    if (!liffId) {
-      setLiffError("NEXT_PUBLIC_LIFF_ID is not set");
-      setIsReady(true);
-      return;
-    }
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
 
-    liff
-      .init({
-        liffId,
-        withLoginOnExternalBrowser: true,
-      })
-      .then(() => {
-        setLiffObject(liff);
-      })
-      .catch((error: Error) => {
-        setLiffError(error.message);
-      })
-      .finally(() => {
-        setIsReady(true);
-      });
-  }, []);
+  useEffect(() => {
+    if (!liffId) return;
+
+    import("@line/liff").then((mod) => {
+      const liff = mod.default;
+      liff
+        .init({
+          liffId,
+          withLoginOnExternalBrowser: true,
+        })
+        .then(() => {
+          setLiffObject(liff);
+          setIsLoggedIn(liff.isLoggedIn());
+          setIsInClient(liff.isInClient?.() ?? false);
+        })
+        .catch((error: Error) => {
+          setLiffError(error.message);
+        })
+        .finally(() => {
+          setIsReady(true);
+        });
+    });
+  }, [liffId]);
+
+  const value = useMemo(
+    () => ({
+      liff: liffObject,
+      liffError: liffId ? liffError : "NEXT_PUBLIC_LIFF_ID is not set",
+      isLoggedIn,
+      isInClient,
+      isReady: liffId ? isReady : true,
+    }),
+    [liffObject, liffError, liffId, isLoggedIn, isInClient, isReady]
+  );
 
   return (
-    <LiffContext.Provider
-      value={{
-        liff: liffObject,
-        liffError,
-        isLoggedIn: liffObject?.isLoggedIn() ?? false,
-        isInClient: typeof window !== "undefined" && liff.isInClient(),
-        isReady,
-      }}
-    >
+    <LiffContext.Provider value={value}>
       {children}
     </LiffContext.Provider>
   );
