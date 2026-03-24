@@ -139,24 +139,15 @@ export function formatDateShort(isoString: string): string {
   });
 }
 
-// ── Public API (no auth) ─────────────────────────────────
-
-async function publicFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`);
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(body?.message || `API error: ${res.status}`);
-  }
-  return res.json();
-}
+// ── Scenes & Tags (authenticated) ────────────────────────
 
 export async function fetchScenes(): Promise<SceneItem[]> {
-  const data = await publicFetch<{ scenes: SceneItem[] }>("/api/scenes");
+  const data = await apiFetch<{ scenes: SceneItem[] }>("/api/scenes");
   return data.scenes;
 }
 
 export function fetchTags(): Promise<TagsData> {
-  return publicFetch<TagsData>("/api/tags");
+  return apiFetch<TagsData>("/api/tags");
 }
 
 // ── Authenticated API ────────────────────────────────────
