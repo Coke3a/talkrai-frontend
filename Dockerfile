@@ -19,6 +19,9 @@ ARG NEXT_PUBLIC_API_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Ensure public/ exists even if empty (Next.js standalone needs it)
+RUN mkdir -p public
+
 RUN pnpm build
 
 # Stage 3: Production runtime
@@ -38,7 +41,10 @@ WORKDIR /app
 
 COPY --from=build --chown=app:app /app/.next/standalone ./
 COPY --from=build --chown=app:app /app/.next/static ./.next/static
-COPY --from=build --chown=app:app /app/public ./public
+
+# public/ may be empty; create it so COPY doesn't fail
+RUN mkdir -p ./public
+COPY --from=build --chown=app:app /app/public/ ./public/
 
 USER app
 
