@@ -75,6 +75,12 @@
   cursor: pointer;
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
+  animation: bannerGlow 3s ease-in-out infinite;
+}
+
+@keyframes bannerGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 107, 240, 0); }
+  50% { box-shadow: 0 0 12px 2px rgba(139, 107, 240, 0.12); }
 }
 
 .sessionBanner:active {
@@ -164,12 +170,22 @@
   position: relative;
   cursor: pointer;
   scroll-snap-align: start;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
   -webkit-tap-highlight-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+@media (hover: hover) {
+  .sceneCard:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
 }
 
 .sceneCard:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
+  transition-duration: 0.1s;
 }
 
 .cardImage {
@@ -236,12 +252,12 @@
 }
 
 .genderBadgeMale {
-  background: rgba(100, 150, 255, 0.7);
+  background: rgba(139, 107, 240, 0.7);
   color: white;
 }
 
 .genderBadgeFemale {
-  background: rgba(255, 130, 170, 0.7);
+  background: rgba(249, 109, 75, 0.7);
   color: white;
 }
 
@@ -259,13 +275,159 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
+/* ── Hero with Avatar Overlay ──────────── */
+.sheetHero {
+  position: relative;
+}
+
+.sheetAvatarOverlay {
+  position: absolute;
+  bottom: -22px;
+  left: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--warm-white);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+/* ── Character Header ──────────────────── */
+.sheetCharHeader {
+  padding-top: 8px;
+}
+
+.sheetCharTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+  margin-bottom: 14px;
+}
+
+/* ── Character Essence Card ────────────── */
+.essenceCard {
+  background: linear-gradient(135deg, var(--soft-ivory), rgba(249, 109, 75, 0.06));
+  border-left: 3px solid var(--lavender-400);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.essenceRow {
+  display: flex;
+  gap: 10px;
+}
+
+.essenceIcon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--lavender-500);
+  margin-top: 1px;
+}
+
+.essenceContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.essenceLabel {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-400);
+  margin-bottom: 4px;
+}
+
+.essenceText {
+  font-size: 0.82rem;
+  color: var(--gray-700);
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.essenceTextExpanded {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.essenceToggle {
+  border: none;
+  background: none;
+  color: var(--lavender-500);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 0;
+  margin-top: 2px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Scene Context Card ────────────────── */
+.sceneContextCard {
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.sceneContextName {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 4px;
+}
+
+.sceneContextMeta {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  line-height: 1.5;
+}
+
+.sceneContextDot {
+  margin: 0 4px;
+}
+
+/* ── Collapsible Section Toggle ────────── */
+.sheetSectionToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chevronIcon {
+  color: var(--gray-400);
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
 /* ── Bottom Sheet ──────────────────────── */
 .sheetBackdrop {
   position: fixed;
   inset: 0;
   z-index: 200;
   background: rgba(0, 0, 0, 0.45);
-  animation: fadeIn 0.2s ease;
 }
 
 .sheetPanel {
@@ -281,17 +443,7 @@
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   box-shadow: var(--shadow-sheet);
   overflow-y: auto;
-  animation: sheetSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-overflow-scrolling: touch;
-}
-
-@keyframes sheetSlideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
 }
 
 .sheetHandle {
@@ -319,6 +471,7 @@
 
 .sheetBody {
   padding: 16px 20px 24px;
+  padding-top: 20px;
 }
 
 .sheetCharName {
@@ -335,7 +488,7 @@
 .sheetSceneName {
   font-size: 0.88rem;
   color: var(--gray-600);
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .sheetSection {
@@ -412,6 +565,7 @@
   background: var(--gray-50);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
+  border: 1px solid var(--gray-200);
 }
 
 .infoLabel {
@@ -448,6 +602,12 @@
   cursor: pointer;
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .ctaButton:hover {
+    transform: scale(1.01);
+  }
 }
 
 .ctaButton:active {
@@ -561,6 +721,12 @@
   color: white;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+@media (hover: hover) {
+  .modalBtnConfirm:hover {
+    transform: scale(1.01);
+  }
 }
 
 .modalBtnConfirm:active {
@@ -714,13 +880,13 @@
 }
 
 .sheetGenderBadgeMale {
-  background: rgba(100, 150, 255, 0.15);
-  color: #4466cc;
+  background: rgba(139, 107, 240, 0.15);
+  color: var(--lavender-500);
 }
 
 .sheetGenderBadgeFemale {
-  background: rgba(255, 130, 170, 0.15);
-  color: #cc4477;
+  background: rgba(249, 109, 75, 0.15);
+  color: var(--coral-500);
 }
 
 /* ── Page bottom padding ──────────── */

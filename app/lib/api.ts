@@ -13,6 +13,8 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   };
 }
 
+const LIFF_AUTH_RETRY_KEY = "liff_auth_retry";
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -20,9 +22,32 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { ...headers, ...init?.headers },
   });
 
+  // Token expired — logout to clear cached token, then re-login (once only)
+  if (res.status === 401) {
+    if (
+      typeof window !== "undefined" &&
+      !sessionStorage.getItem(LIFF_AUTH_RETRY_KEY)
+    ) {
+      sessionStorage.setItem(LIFF_AUTH_RETRY_KEY, "1");
+      const { default: liff } = await import("@line/liff");
+      liff.logout(); // Clear cached expired token
+      liff.login({ redirectUri: window.location.href });
+      throw new Error("Token expired — re-authenticating");
+    }
+    // Already retried once this session — don't loop
+    sessionStorage.removeItem(LIFF_AUTH_RETRY_KEY);
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message || "Authentication failed");
+  }
+
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     throw new Error(body?.message || `API error: ${res.status}`);
+  }
+
+  // Success — clear retry flag
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem(LIFF_AUTH_RETRY_KEY);
   }
 
   return res.json();
@@ -85,6 +110,8 @@ export interface SceneCharacter {
   avatar_url: string | null;
   appearance_tags: string[];
   personality_tags: string[];
+  personality: string;
+  background: string;
 }
 
 export interface SceneItem {
@@ -184,4 +211,34 @@ export function endSession(): Promise<EndSessionResponse> {
   return apiFetch<EndSessionResponse>("/api/sessions/end", {
     method: "POST",
   });
+}
+
+// ── Payments ──────────────────────────────────────────────
+
+export interface CreatePaymentResponse {
+  payment_url: string;
+  order_id: string;
+}
+
+export interface PaymentStatusResponse {
+  status: "pending" | "completed" | "failed" | "expired";
+  credits_amount: number;
+  price_thb: number;
+}
+
+export function createPayment(
+  packageId: string
+): Promise<CreatePaymentResponse> {
+  return apiFetch<CreatePaymentResponse>("/api/payments/create", {
+    method: "POST",
+    body: JSON.stringify({ package_id: packageId }),
+  });
+}
+
+export function fetchPaymentStatus(
+  orderId: string
+): Promise<PaymentStatusResponse> {
+  return apiFetch<PaymentStatusResponse>(
+    `/api/payments/status?order_id=${orderId}`
+  );
 }

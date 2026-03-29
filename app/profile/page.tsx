@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useLiff } from "@/app/providers/liff-provider";
 import { fetchProfile, type ProfileStats } from "@/app/lib/api";
+import { PageHeader } from "../components/page-header";
+import { LoadingState } from "../components/loading-state";
+import { ErrorState } from "../components/error-state";
+import { BookOpen, MessageSquare, Sparkles } from "lucide-react";
 import styles from "./profile.module.css";
 
 interface LineProfile {
@@ -48,37 +53,20 @@ export default function ProfilePage() {
   }, [isReady, liff, liffError]);
 
   if (!isReady || (!lineProfile && !error && !liffError)) {
-    return (
-      <div className="page-wrapper">
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="animate-pulse text-center">
-            <div className="mb-3 text-4xl">👤</div>
-            <p className="font-thai text-sm text-tgray-500">Loading...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState title="โปรไฟล์" />;
   }
 
   if (liffError || error) {
     return (
-      <div className="page-wrapper">
-        <div className="flex min-h-screen items-center justify-center px-6">
-          <div className="card rounded-[var(--radius-xl)] p-8 text-center">
-            <div className="mb-4 text-4xl">😢</div>
-            <h1 className="font-display mb-2 text-xl font-semibold text-tgray-900">
-              เกิดข้อผิดพลาด
-            </h1>
-            <p className="font-thai text-sm text-tgray-500">
-              {liffError || error}
-            </p>
-          </div>
-        </div>
-      </div>
+      <ErrorState
+        headerTitle="โปรไฟล์"
+        message={(liffError || error)!}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 
-  const displayName = lineProfile?.displayName ?? "User";
+  const displayName = lineProfile?.displayName ?? "คุณ";
   const pictureUrl =
     lineProfile?.pictureUrl ??
     `https://api.dicebear.com/9.x/adventurer/svg?seed=${displayName}`;
@@ -88,29 +76,33 @@ export default function ProfilePage() {
 
   return (
     <div className="page-wrapper">
-      {/* Header */}
-      <header className="page-header">
-        <div className="header-inner">
-          <h1 className="header-title">โปรไฟล์</h1>
-        </div>
-      </header>
+      <PageHeader title="โปรไฟล์" />
 
-      {/* Main Content */}
       <main className="px-5 pt-5 pb-12">
         {/* Profile Hero */}
-        <section
+        <motion.section
           className={styles.hero}
           style={{
             background:
               "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-400) 25%, var(--lavender-500) 100%)",
           }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
         >
           <div className={styles.heroDecorativeCircle} />
 
           <div className="relative z-10">
-            {/* Avatar */}
+            {/* Avatar with sparkle */}
             <div className={styles.avatarWrapper}>
               <div className={styles.avatarRing} />
+              {/* Sparkle decorations */}
+              <div className={styles.avatarSparkle} style={{ top: -4, right: -4 }}>
+                <Sparkles size={14} color="rgba(255,255,255,0.7)" />
+              </div>
+              <div className={styles.avatarSparkle} style={{ bottom: 8, left: -6, animationDelay: '1s' }}>
+                <Sparkles size={10} color="rgba(255,255,255,0.5)" />
+              </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={pictureUrl}
@@ -124,36 +116,61 @@ export default function ProfilePage() {
               Member since {formatMemberSince(createdAt)}
             </p>
           </div>
-        </section>
+        </motion.section>
 
         {/* Stats Grid */}
         <div className="mb-6 mt-6">
           <span className="section-label">สถิติของคุณ</span>
           <div className={styles.statsGrid}>
-            <div className={`card ${styles.statCard}`}>
-              <div
-                className={`${styles.statIconWrapper} ${styles.statIconCoral}`}
-              >
-                📖
+            <motion.div
+              className={`card ${styles.statCard}`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+            >
+              <div className={`${styles.statIconWrapper} ${styles.statIconCoral}`}>
+                <BookOpen size={22} />
               </div>
-              <div className={styles.statValue}>{totalSessions}</div>
+              <motion.div
+                className={styles.statValue}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.35, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+              >
+                {totalSessions}
+              </motion.div>
               <div className={styles.statLabel}>เรื่องราวทั้งหมด</div>
-            </div>
+            </motion.div>
 
-            <div className={`card ${styles.statCard}`}>
-              <div
-                className={`${styles.statIconWrapper} ${styles.statIconLavender}`}
-              >
-                💬
+            <motion.div
+              className={`card ${styles.statCard}`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+            >
+              <div className={`${styles.statIconWrapper} ${styles.statIconLavender}`}>
+                <MessageSquare size={22} />
               </div>
-              <div className={styles.statValue}>{totalMessages}</div>
+              <motion.div
+                className={styles.statValue}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.45, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+              >
+                {totalMessages}
+              </motion.div>
               <div className={styles.statLabel}>ข้อความ</div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
         {/* LINE Status */}
-        <div className="mb-6">
+        <motion.div
+          className="mb-6"
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
           <span className="section-label">การเชื่อมต่อ</span>
           <div
             className={styles.lineStatus}
@@ -169,24 +186,27 @@ export default function ProfilePage() {
               </span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Gratitude Card */}
-        <div
+        <motion.div
           className={styles.gratitudeCard}
           style={{
             background:
               "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-400) 25%, var(--lavender-500) 100%)",
           }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
         >
-          <span className={styles.gratitudeIcon}>✨</span>
+          <span className={styles.gratitudeIcon}><Sparkles size={28} /></span>
           <h3 className={styles.gratitudeTitle}>
             ขอบคุณที่เป็นส่วนหนึ่งของ TalkRai!
           </h3>
           <p className={`font-thai ${styles.gratitudeText}`}>
             ขอบคุณที่เป็นส่วนหนึ่งของ TalkRai
           </p>
-        </div>
+        </motion.div>
       </main>
     </div>
   );

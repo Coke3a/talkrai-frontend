@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 160" width="2340" height="480">
+  <defs>
+    <radialGradient id="bubbleGrad2" cx="50%" cy="45%" r="50%" fx="50%" fy="40%">
+      <stop offset="0%" stop-color="#FFB09A" stop-opacity="0.7"/>
+      <stop offset="60%" stop-color="#FF8B6A" stop-opacity="0.0"/>
+    </radialGradient>
+    <radialGradient id="highlightGrad2" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.0"/>
+    </radialGradient>
+    <style>
+      @font-face {
+        font-family: 'Quicksand';
+        font-weight: 600;
+        src: url('file:///sessions/great-laughing-cori/.local/share/fonts/Quicksand-600.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Quicksand';
+        font-weight: 300;
+        src: url('file:///sessions/great-laughing-cori/.local/share/fonts/Quicksand-300.ttf') format('truetype');
+      }
+    </style>
+  </defs>
+
+  <!-- Logomark (scaled down to fit) -->
+  <g transform="translate(20, 5) scale(0.295)">
+    <path d="
+      M 256 68
+      C 386 68 460 140 460 240
+      C 460 340 386 412 256 412
+      C 220 412 186 406 156 394
+      L 100 440
+      L 120 384
+      C 76 354 52 306 52 240
+      C 52 140 126 68 256 68
+      Z
+    " fill="#FF8B6A" />
+    <ellipse cx="265" cy="230" rx="155" ry="120" fill="url(#bubbleGrad2)" />
+    <ellipse cx="255" cy="215" rx="130" ry="95" fill="url(#highlightGrad2)" />
+  </g>
+
+  <!-- Wordmark: single baseline, tspan for tight spacing -->
+  <text x="190" y="118" font-family="Quicksand, sans-serif" letter-spacing="0.02em">
+    <tspan font-weight="600" font-size="110" fill="#2A2521">Talk</tspan><tspan font-weight="300" font-size="110" fill="#F96D4B">rai</tspan>
+  </text>
+</svg>

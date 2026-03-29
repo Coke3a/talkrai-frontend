@@ -96,20 +96,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
   flex-shrink: 0;
 }
 
 .moodBackdropHappy {
-  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+  background: linear-gradient(135deg, var(--coral-50), var(--coral-100));
 }
 
 .moodBackdropSad {
-  background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+  background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
 }
 
 .moodBackdropAngry {
-  background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+  background: linear-gradient(135deg, var(--mint-50), var(--mint-100));
 }
 
 .moodBackdropNeutral {
@@ -117,11 +116,11 @@
 }
 
 .moodBackdropExcited {
-  background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+  background: linear-gradient(135deg, var(--lavender-50), var(--lavender-100));
 }
 
 .moodBackdropShy {
-  background: linear-gradient(135deg, #FCE4EC, #F8BBD0);
+  background: linear-gradient(135deg, var(--blush), var(--coral-50));
 }
 
 .moodLabel {
@@ -151,7 +150,8 @@
 }
 
 .relationshipIcon {
-  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .relationshipLevel {
@@ -159,6 +159,38 @@
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--coral-500);
+}
+
+/* Relationship Progress Bar */
+.progressTrack {
+  position: relative;
+  height: 6px;
+  background: var(--gray-100);
+  border-radius: 3px;
+  margin-top: 14px;
+  overflow: visible;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--coral-400), var(--coral-500));
+  border-radius: 3px;
+  position: relative;
+}
+
+.progressLabels {
+  position: relative;
+}
+
+.progressDot {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  border: 2px solid var(--warm-white);
+  transition: background 0.3s ease;
 }
 
 /* Scene Summary */
@@ -188,8 +220,10 @@
   transition: color 0.2s ease;
 }
 
-.readMoreBtn:hover {
-  color: var(--lavender-600);
+@media (hover: hover) {
+  .readMoreBtn:hover {
+    color: var(--lavender-600);
+  }
 }
 
 /* Stats Grid */
@@ -213,13 +247,14 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 12px;
-  font-size: 1.3rem;
   background: var(--coral-100);
   transition: transform 0.3s ease;
 }
 
-.statCard:hover .statIconWrapper {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .statCard:hover .statIconWrapper {
+    transform: scale(1.1);
+  }
 }
 
 .statValue {
@@ -300,7 +335,6 @@
 }
 
 .dialogIcon {
-  font-size: 2.5rem;
   margin-bottom: 16px;
   display: block;
 }
@@ -338,8 +372,10 @@
   transition: background 0.2s ease;
 }
 
-.cancelBtn:hover {
-  background: var(--gray-200);
+@media (hover: hover) {
+  .cancelBtn:hover {
+    background: var(--gray-200);
+  }
 }
 
 .confirmBtn {

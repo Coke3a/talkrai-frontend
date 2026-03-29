@@ -1,38 +1,55 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { PageHeader } from "../components/page-header";
+import {
+  MessageSquare,
+  Zap,
+  Film,
+  MessageCircle,
+  Brain,
+  Heart,
+  Target,
+} from "lucide-react";
+import { motion } from "framer-motion";
 import styles from "./how-to.module.css";
-import { BackButton } from "./back-button";
 
 export default function HowToPage() {
+  const router = useRouter();
+
   return (
     <div className="page-wrapper">
       {/* Header */}
-      <header className="page-header">
-        <div className="header-inner relative">
-          <BackButton className={styles.backButton} />
-          <h1 className="header-title font-thai">วิธีเล่น</h1>
-        </div>
-      </header>
+      <PageHeader title="วิธีเล่น" showBackButton showLogo={false} />
 
       {/* Main Content */}
       <main className="px-5 pt-5 pb-12">
         {/* Hero Section */}
-        <section
+        <motion.section
           className={styles.hero}
           style={{
             background:
               "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-400) 30%, var(--lavender-500) 100%)",
           }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
         >
           <div className={styles.heroDecorativeCircle1} />
           <div className={styles.heroDecorativeCircle2} />
 
           <div className="relative z-10">
-            <span className={styles.heroEmoji}>🎭</span>
+            <img
+              src="/talkrai-logo-cream.svg"
+              alt="โลโก้ TalkRai"
+              className={styles.heroLogo}
+            />
             <h2 className={styles.heroTitle}>วิธีเล่นเรื่องราว</h2>
             <p className={`font-thai ${styles.heroSubtitle}`}>
-              เริ่มต้นง่ายๆ แค่ไม่กี่ขั้นตอน ☺️
+              เริ่มต้นง่ายๆ แค่ไม่กี่ขั้นตอน
             </p>
           </div>
-        </section>
+        </motion.section>
 
         {/* Steps Timeline */}
         <div className="mb-8 mt-8">
@@ -42,7 +59,13 @@ export default function HowToPage() {
             <div className={styles.timelineLine} />
 
             {/* Step 1 */}
-            <div className={styles.step}>
+            <motion.div
+              className={styles.step}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+            >
               <div className={`${styles.stepBadge} ${styles.stepBadgeCoral}`}>
                 1
               </div>
@@ -54,10 +77,16 @@ export default function HowToPage() {
                   เลือกฉากที่ถูกใจแล้วเริ่มเล่นเลย!
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Step 2 */}
-            <div className={styles.step}>
+            <motion.div
+              className={styles.step}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: 0.1, ease: [0.34, 1.56, 0.64, 1] }}
+            >
               <div
                 className={`${styles.stepBadge} ${styles.stepBadgeLavender}`}
               >
@@ -68,7 +97,9 @@ export default function HowToPage() {
                 {/* Normal Speech */}
                 <div className={styles.subCard}>
                   <div className={styles.subCardHeader}>
-                    <span className={styles.subCardEmoji}>💬</span>
+                    <span className={styles.subCardEmoji}>
+                      <MessageSquare size={18} />
+                    </span>
                     <span className={`font-thai ${styles.subCardTitle}`}>
                       คำพูดธรรมดา
                     </span>
@@ -84,7 +115,9 @@ export default function HowToPage() {
                 {/* Action */}
                 <div className={styles.subCard}>
                   <div className={styles.subCardHeader}>
-                    <span className={styles.subCardEmoji}>⚡</span>
+                    <span className={styles.subCardEmoji}>
+                      <Zap size={18} />
+                    </span>
                     <span className={`font-thai ${styles.subCardTitle}`}>
                       การกระทำ Action
                     </span>
@@ -101,7 +134,9 @@ export default function HowToPage() {
                 {/* Mixed */}
                 <div className={styles.subCard}>
                   <div className={styles.subCardHeader}>
-                    <span className={styles.subCardEmoji}>🎬</span>
+                    <span className={styles.subCardEmoji}>
+                      <Film size={18} />
+                    </span>
                     <span className={`font-thai ${styles.subCardTitle}`}>
                       ผสมกัน Mixed
                     </span>
@@ -114,10 +149,16 @@ export default function HowToPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Step 3 */}
-            <div className={styles.step}>
+            <motion.div
+              className={styles.step}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
+            >
               <div className={`${styles.stepBadge} ${styles.stepBadgeMint}`}>
                 3
               </div>
@@ -129,7 +170,7 @@ export default function HowToPage() {
                   สนุกกับเรื่องราวที่คุณร่วมสร้าง!
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
@@ -138,7 +179,7 @@ export default function HowToPage() {
           <span className="section-label">ตัวอย่างการสนทนา</span>
           <div className={styles.chatMockup}>
             <div className={styles.chatMockupHeader}>
-              Chat Preview
+              ตัวอย่างแชท
             </div>
             <div className={styles.chatMockupBody}>
               {/* User message */}
@@ -183,28 +224,36 @@ export default function HowToPage() {
           <span className="section-label">เคล็ดลับ</span>
           <div className={styles.tipsGrid}>
             <div className={`${styles.tipCard} ${styles.tipCardLavender}`}>
-              <span className={styles.tipEmoji}>💭</span>
+              <span className={styles.tipEmoji}>
+                <MessageCircle size={24} />
+              </span>
               <p className={`font-thai ${styles.tipTitle}`}>
                 ใช้การกระทำบอกอารมณ์ จะทำให้เรื่องสมจริงขึ้น
               </p>
             </div>
 
             <div className={`${styles.tipCard} ${styles.tipCardMint}`}>
-              <span className={styles.tipEmoji}>🧠</span>
+              <span className={styles.tipEmoji}>
+                <Brain size={24} />
+              </span>
               <p className={`font-thai ${styles.tipTitle}`}>
                 ตัวละครจำเรื่องราวได้ และพัฒนาไปเรื่อยๆ
               </p>
             </div>
 
             <div className={`${styles.tipCard} ${styles.tipCardCoral}`}>
-              <span className={styles.tipEmoji}>💝</span>
+              <span className={styles.tipEmoji}>
+                <Heart size={24} />
+              </span>
               <p className={`font-thai ${styles.tipTitle}`}>
                 ยิ่งคุยมาก ความสัมพันธ์ยิ่งลึกซึ้ง
               </p>
             </div>
 
             <div className={`${styles.tipCard} ${styles.tipCardMixed}`}>
-              <span className={styles.tipEmoji}>🎯</span>
+              <span className={styles.tipEmoji}>
+                <Target size={24} />
+              </span>
               <p className={`font-thai ${styles.tipTitle}`}>
                 ลองวิธีเข้าหาตัวละครหลายๆ แบบ
               </p>
@@ -224,7 +273,10 @@ export default function HowToPage() {
           <p className={`font-thai ${styles.ctaSubtitle}`}>
             เลือกฉากแล้วเริ่มผจญภัยเลย!
           </p>
-          <button className={`font-thai ${styles.ctaButton}`}>
+          <button
+            className={`font-thai ${styles.ctaButton}`}
+            onClick={() => router.push("/scenes")}
+          >
             เลือกฉากตอนนี้
           </button>
         </section>

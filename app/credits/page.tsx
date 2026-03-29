@@ -1,18 +1,27 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLiff } from "@/app/providers/liff-provider";
 import {
   fetchCreditBalance,
   fetchCreditTransactions,
+  createPayment,
   formatDate,
   type CreditBalance,
   type TransactionItem,
 } from "@/app/lib/api";
+import { PageHeader } from "../components/page-header";
+import { LoadingState } from "../components/loading-state";
+import { ErrorState } from "../components/error-state";
+import { EmptyState } from "../components/empty-state";
+import { SuccessOverlay } from "../components/success-overlay";
+import { getTransactionIcon } from "@/app/lib/icons";
+import { Coffee, Sparkles, Gem, TrendingUp, MessageCircle, AlertTriangle, Receipt, Coins } from "lucide-react";
 import styles from "./credits.module.css";
 
 // ── Constants (product config, not user data) ────────────
-
 const CREDITS_PER_MESSAGE = 2;
 const LOW_BALANCE_THRESHOLD = 20;
 const PAGE_SIZE = 5;
@@ -20,15 +29,15 @@ const PAGE_SIZE = 5;
 const PACKAGES = [
   {
     id: "basic",
-    emoji: "☕",
+    icon: Coffee,
     name: "ลองเลย",
     credits: 50,
     price: 29,
     tier: "basic" as const,
   },
   {
-    id: "recommended",
-    emoji: "✨",
+    id: "plus",
+    icon: Sparkles,
     name: "สายฟิน",
     credits: 150,
     price: 69,
@@ -37,7 +46,7 @@ const PACKAGES = [
   },
   {
     id: "premium",
-    emoji: "💎",
+    icon: Gem,
     name: "ฟินไม่จำกัด",
     credits: 400,
     price: 149,
@@ -47,7 +56,6 @@ const PACKAGES = [
 ];
 
 // ── Transaction Helpers ────────────────────────────────────
-
 function getTransactionLabel(type: string): string {
   switch (type) {
     case "consumption": return "ใช้เครดิต";
@@ -59,30 +67,29 @@ function getTransactionLabel(type: string): string {
   }
 }
 
-function getTransactionIcon(type: string): string {
-  switch (type) {
-    case "consumption": return "💬";
-    case "purchase": return "💳";
-    case "bonus": return "🎁";
-    case "refund": return "↩️";
-    case "adjustment": return "🔧";
-    default: return "📝";
-  }
-}
-
 function isPositive(type: string): boolean {
   return type !== "consumption";
 }
 
 // ── Component ──────────────────────────────────────────────
-
 export default function CreditsPage() {
+  return (
+    <Suspense fallback={<LoadingState title="เครดิต" />}>
+      <CreditsContent />
+    </Suspense>
+  );
+}
+
+function CreditsContent() {
   const { isReady, liff, liffError } = useLiff();
+  const searchParams = useSearchParams();
   const [balance, setBalance] = useState<CreditBalance | null>(null);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [totalTransactions, setTotalTransactions] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successCredits, setSuccessCredits] = useState(0);
 
   useEffect(() => {
     if (!isReady || !liff || liffError) return;
@@ -96,6 +103,14 @@ export default function CreditsPage() {
         setBalance(balanceData);
         setTransactions(txData.transactions);
         setTotalTransactions(txData.total);
+
+        // Show success overlay if redirected from payment
+        const success = searchParams.get("success");
+        const credits = searchParams.get("credits");
+        if (success === "true" && credits) {
+          setSuccessCredits(parseInt(credits, 10));
+          setShowSuccess(true);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       } finally {
@@ -104,7 +119,7 @@ export default function CreditsPage() {
     };
 
     loadData();
-  }, [isReady, liff, liffError]);
+  }, [isReady, liff, liffError, searchParams]);
 
   const loadMore = useCallback(async () => {
     try {
@@ -119,33 +134,16 @@ export default function CreditsPage() {
   }, [transactions.length]);
 
   if (!isReady || loading) {
-    return (
-      <div className="page-wrapper">
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="animate-pulse text-center">
-            <div className="mb-3 text-4xl">💰</div>
-            <p className="font-thai text-sm text-tgray-500">Loading...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState title="เครดิต" />;
   }
 
   if (liffError || error) {
     return (
-      <div className="page-wrapper">
-        <div className="flex min-h-screen items-center justify-center px-6">
-          <div className="card rounded-[var(--radius-xl)] p-8 text-center">
-            <div className="mb-4 text-4xl">😢</div>
-            <h1 className="font-display mb-2 text-xl font-semibold text-tgray-900">
-              เกิดข้อผิดพลาด
-            </h1>
-            <p className="font-thai text-sm text-tgray-500">
-              {liffError || error}
-            </p>
-          </div>
-        </div>
-      </div>
+      <ErrorState
+        headerTitle="เครดิต"
+        message={(liffError || error)!}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 
@@ -157,20 +155,18 @@ export default function CreditsPage() {
 
   return (
     <div className="page-wrapper">
-      {/* Header */}
-      <header className="page-header">
-        <div className="header-inner">
-          <h1 className="header-title">เครดิต</h1>
-        </div>
-      </header>
+      <PageHeader title="เครดิต" />
 
       <main className="px-5 pt-5 pb-12">
         {/* ── Credit Hero ────────────────────── */}
-        <section
+        <motion.section
           className={styles.heroCard}
           style={{
             background: "linear-gradient(160deg, var(--soft-ivory) 0%, var(--blush) 100%)",
           }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
         >
           {/* Radial glow */}
           <div
@@ -180,33 +176,62 @@ export default function CreditsPage() {
             }}
           />
 
+          {/* Floating coin particles */}
+          <Coins size={16} className={styles.heroParticle} style={{ top: '15%', left: '12%', color: 'var(--coral-300)' }} />
+          <Coins size={12} className={styles.heroParticle} style={{ top: '25%', right: '15%', color: 'var(--lavender-300)' }} />
+          <Sparkles size={14} className={styles.heroParticle} style={{ bottom: '20%', left: '20%', color: 'var(--coral-200)' }} />
+
           <div className="relative z-10">
             <p className={`${styles.heroLabel} font-thai`}>เครดิตคงเหลือ</p>
-            <p className={styles.heroBalance}>{creditBalance}</p>
+            <motion.p
+              className={styles.heroBalance}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1], delay: 0.2 }}
+            >
+              {creditBalance}
+            </motion.p>
             <p className={`${styles.heroUnit} font-thai`}>เครดิต</p>
             <p className={`${isLowBalance ? styles.heroNoteWarning : styles.heroNote} font-thai`}>
-              {isLowBalance && "⚠️ "}ใช้ {CREDITS_PER_MESSAGE} เครดิตต่อข้อความ
+              {isLowBalance && <AlertTriangle size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 4 }} />}ใช้ {CREDITS_PER_MESSAGE} เครดิตต่อข้อความ
             </p>
 
             <div className={styles.statPills}>
-              <div className={styles.statPill}>
-                <span className={styles.statPillEmoji}>🌿</span>
+              <motion.div
+                className={styles.statPill}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+              >
+                <TrendingUp size={14} style={{ opacity: 0.7 }} />
                 <span className="font-thai">เติมแล้ว {totalPurchased}</span>
-              </div>
-              <div className={styles.statPill}>
-                <span className={styles.statPillEmoji}>💬</span>
+              </motion.div>
+              <motion.div
+                className={styles.statPill}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+              >
+                <MessageCircle size={14} style={{ opacity: 0.7 }} />
                 <span className="font-thai">ใช้แล้ว {totalConsumed}</span>
-              </div>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* ── Package Selection ──────────────── */}
         <div className="mt-8 mb-6">
           <span className="section-label">เติมเครดิต</span>
           <div className={styles.packageGrid}>
-            {PACKAGES.map((pkg) => (
-              <PackageCard key={pkg.id} pkg={pkg} />
+            {PACKAGES.map((pkg, i) => (
+              <motion.div
+                key={pkg.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 + i * 0.1, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+              >
+                <PackageCard pkg={pkg} />
+              </motion.div>
             ))}
           </div>
         </div>
@@ -216,38 +241,68 @@ export default function CreditsPage() {
           <span className="section-label">ประวัติธุรกรรม</span>
           <div className={styles.transactionList}>
             {transactions.length === 0 ? (
-              <div className="py-8 text-center">
-                <p className="font-thai text-sm text-tgray-400">ยังไม่มีธุรกรรม</p>
+              <div className="py-4">
+                <EmptyState icon={Receipt} title="ยังไม่มีธุรกรรม" />
               </div>
             ) : (
-              transactions.map((tx, i) => (
-                <TransactionRow key={`${tx.created_at}-${tx.amount}-${i}`} tx={tx} />
-              ))
+              <AnimatePresence>
+                {transactions.map((tx, i) => (
+                  <motion.div
+                    key={`${tx.created_at}-${tx.amount}-${i}`}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.35 }}
+                  >
+                    <TransactionRow tx={tx} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             )}
 
             {hasMore && (
-              <button
+              <motion.button
                 className={`${styles.loadMoreBtn} font-thai`}
                 onClick={loadMore}
+                whileTap={{ scale: 0.97 }}
               >
                 โหลดเพิ่มเติม
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
       </main>
+
+      {showSuccess && (
+        <SuccessOverlay
+          title="เติมเครดิตสำเร็จ!"
+          subtitle={`ได้รับ +${successCredits} เครดิต`}
+        />
+      )}
     </div>
   );
 }
 
 // ── Package Card ───────────────────────────────────────────
-
 function PackageCard({
   pkg,
 }: {
   pkg: (typeof PACKAGES)[number];
 }) {
+  const [purchasing, setPurchasing] = useState(false);
   const perCredit = (pkg.price / pkg.credits).toFixed(2);
+
+  const handlePurchase = async () => {
+    if (purchasing) return;
+    setPurchasing(true);
+    try {
+      const result = await createPayment(pkg.id);
+      // Redirect to Beam payment page
+      window.location.href = result.payment_url;
+    } catch (err) {
+      setPurchasing(false);
+      alert(err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองใหม่");
+    }
+  };
 
   const cardClass = (() => {
     switch (pkg.tier) {
@@ -288,11 +343,25 @@ function PackageCard({
             pkg.tier === "recommended" ? styles.badgeRecommended : styles.badgeBestValue
           }`}
         >
+          {pkg.tier === "recommended" && (
+            <Sparkles size={10} className={styles.badgeSparkle} />
+          )}
           {pkg.badge}
         </span>
       )}
 
-      <span className={styles.packageEmoji}>{pkg.emoji}</span>
+      {(() => {
+        const PkgIcon = pkg.icon;
+        return (
+          <div className={styles.packageIconWrapper} style={
+            pkg.tier === "recommended"
+              ? { background: "rgba(255,255,255,0.2)" }
+              : { background: "var(--coral-50)" }
+          }>
+            <PkgIcon size={20} color={pkg.tier === "recommended" ? "white" : "var(--coral-500)"} />
+          </div>
+        );
+      })()}
       <p className={`${styles.packageName} font-thai`} style={{ color: textColor }}>
         {pkg.name}
       </p>
@@ -312,22 +381,26 @@ function PackageCard({
         ({perCredit} บาท/เครดิต)
       </p>
 
-      <button className={ctaClass} disabled>
-        <span className="font-thai">เร็วๆ นี้</span>
-        <span className={styles.tooltip}>กำลังพัฒนา</span>
+      <button
+        className={ctaClass}
+        onClick={handlePurchase}
+        disabled={purchasing}
+      >
+        <span className="font-thai">
+          {purchasing ? "กำลังดำเนินการ..." : "เติมเครดิต"}
+        </span>
       </button>
     </div>
   );
 }
 
 // ── Transaction Row ────────────────────────────────────────
-
 function TransactionRow({ tx }: { tx: TransactionItem }) {
   const positive = isPositive(tx.type);
-  const icon = getTransactionIcon(tx.type);
   const label = getTransactionLabel(tx.type);
   const sign = positive ? "+" : "";
   const dateStr = formatDate(tx.created_at);
+  const TxIconComponent = getTransactionIcon(tx.type);
 
   return (
     <div
@@ -335,12 +408,9 @@ function TransactionRow({ tx }: { tx: TransactionItem }) {
         positive ? styles.transactionPositive : styles.transactionNegative
       }`}
     >
-      <div
-        className={`${styles.transactionIcon} ${
-          positive ? styles.transactionIconPositive : styles.transactionIconNegative
-        }`}
-      >
-        {icon}
+      <div className={`${styles.transactionIcon} ${positive ? styles.transactionIconPositive : styles.transactionIconNegative}`}>
+        {/* eslint-disable-next-line react-hooks/static-components */}
+        <TxIconComponent size={18} />
       </div>
       <div className={styles.transactionInfo}>
         <p className={`${styles.transactionType} font-thai`}>{label}</p>

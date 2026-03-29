@@ -10,6 +10,12 @@ import {
   type SceneItem,
   type TagsData,
 } from "@/app/lib/api";
+import { PageHeader } from "../components/page-header";
+import { ErrorState } from "../components/error-state";
+import { SuccessOverlay } from "../components/success-overlay";
+import { getCategoryIcon } from "@/app/lib/icons";
+import { ImageOff } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import styles from "./scenes.module.css";
 
 // ── Types (page-local) ─────────────────────────────────────
@@ -31,45 +37,45 @@ const CATEGORY_ROWS: {
   filter: (s: SceneItem) => boolean;
   sortLatest?: boolean;
 }[] = [
-  { key: "popular", label: "🔥 ยอดนิยม", filter: () => true },
+  { key: "popular", label: "ยอดนิยม", filter: () => true },
   {
     key: "tsundere",
-    label: "💔 ซึนเดเระ — ปากร้ายแต่ใจดี",
+    label: "ซึนเดเระ — ปากร้ายแต่ใจดี",
     filter: (s) => s.character.personality_tags.includes("tsundere"),
   },
   {
     key: "cheerful",
-    label: "☀️ สดใส เต็มพลัง",
+    label: "สดใส เต็มพลัง",
     filter: (s) => s.character.personality_tags.includes("cheerful"),
   },
   {
     key: "mysterious",
-    label: "🌙 ลึกลับ ชวนค้นหา",
+    label: "ลึกลับ ชวนค้นหา",
     filter: (s) => s.character.personality_tags.includes("mysterious"),
   },
   {
     key: "caring",
-    label: "🤍 อ่อนโยน ดูแลเธอเสมอ",
+    label: "อ่อนโยน ดูแลเธอเสมอ",
     filter: (s) => s.character.personality_tags.includes("caring"),
   },
   {
     key: "shy",
-    label: "🦋 ขี้อาย แต่น่าค้นหา",
+    label: "ขี้อาย แต่น่าค้นหา",
     filter: (s) => s.character.personality_tags.includes("shy"),
   },
   {
     key: "flirty",
-    label: "✨ มีเสน่ห์ หยุดใจไม่อยู่",
+    label: "มีเสน่ห์ หยุดใจไม่อยู่",
     filter: (s) => s.character.personality_tags.includes("flirty"),
   },
   {
     key: "cool",
-    label: "🖤 เท่ มีออร่า",
+    label: "เท่ มีออร่า",
     filter: (s) => s.character.appearance_tags.includes("cool"),
   },
   {
     key: "latest",
-    label: "✨ ใหม่ล่าสุด",
+    label: "ใหม่ล่าสุด",
     filter: () => true,
     sortLatest: true,
   },
@@ -104,6 +110,11 @@ export default function ScenesPage() {
   const [startingSession, setStartingSession] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Bottom sheet detail states
+  const [expandedPersonality, setExpandedPersonality] = useState(false);
+  const [expandedBackground, setExpandedBackground] = useState(false);
+  const [openingPreviewOpen, setOpeningPreviewOpen] = useState(false);
 
   // ── Data Fetching ────────────────────────────────────
 
@@ -213,11 +224,7 @@ export default function ScenesPage() {
   if (!isReady || loading) {
     return (
       <div className="page-wrapper">
-        <header className="page-header">
-          <div className="header-inner">
-            <h1 className="header-title">เลือกฉาก</h1>
-          </div>
-        </header>
+        <PageHeader title="เลือกฉาก" />
         <div className={styles.genderToggle}>
           <div className={styles.genderPill}>
             {["ทั้งหมด", "ชาย", "หญิง"].map((label) => (
@@ -249,24 +256,11 @@ export default function ScenesPage() {
 
   if (error) {
     return (
-      <div className="page-wrapper">
-        <header className="page-header">
-          <div className="header-inner">
-            <h1 className="header-title">เลือกฉาก</h1>
-          </div>
-        </header>
-        <div className={styles.errorState}>
-          <div className={styles.errorEmoji}>{"😿"}</div>
-          <div className={styles.errorTitle}>โหลดข้อมูลไม่สำเร็จ</div>
-          <div className={styles.errorText}>{error}</div>
-          <button
-            className={styles.retryButton}
-            onClick={() => window.location.reload()}
-          >
-            ลองใหม่
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        headerTitle="เลือกฉาก"
+        message={error}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 
@@ -274,13 +268,11 @@ export default function ScenesPage() {
 
   if (showSuccess) {
     return (
-      <div className={styles.successOverlay}>
-        <div className={styles.successEmoji}>{"🎭"}</div>
-        <div className={styles.successText}>เริ่มเรื่องราวแล้ว!</div>
-        <div className={styles.successSub}>
-          กรุณากลับไปที่ LINE เพื่อเริ่มแชท
-        </div>
-      </div>
+      <SuccessOverlay
+        title="เริ่มเรื่องราวแล้ว!"
+        subtitle="กรุณากลับไปที่ LINE เพื่อเริ่มแชท"
+        showLineButton
+      />
     );
   }
 
@@ -289,11 +281,7 @@ export default function ScenesPage() {
   return (
     <div className="page-wrapper">
       {/* Header */}
-      <header className="page-header">
-        <div className="header-inner">
-          <h1 className="header-title">เลือกฉาก</h1>
-        </div>
-      </header>
+      <PageHeader title="เลือกฉาก" />
 
       {/* Gender Toggle */}
       <div className={styles.genderToggle}>
@@ -359,7 +347,13 @@ export default function ScenesPage() {
           style={{ animationDelay: `${idx * 0.08}s` }}
         >
           <div className={styles.categoryHeader}>
-            <div className={styles.categoryTitle}>{category.label}</div>
+            <div className={styles.categoryTitle}>
+              {(() => {
+                const Icon = getCategoryIcon(category.key);
+                return <Icon size={16} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6, opacity: 0.75 }} />;
+              })()}
+              {category.label}
+            </div>
           </div>
           <div className={styles.scrollTrack}>
             {category.items.map((scene) => (
@@ -369,6 +363,9 @@ export default function ScenesPage() {
                 onClick={() => {
                   setSelectedScene(scene);
                   setStartError(null);
+                  setExpandedPersonality(false);
+                  setExpandedBackground(false);
+                  setOpeningPreviewOpen(false);
                 }}
               >
                 {scene.image_url ? (
@@ -379,7 +376,7 @@ export default function ScenesPage() {
                     loading="lazy"
                   />
                 ) : (
-                  <div className={styles.cardFallback}>{"🎭"}</div>
+                  <div className={styles.cardFallback}><ImageOff size={32} color="var(--gray-300)" /></div>
                 )}
                 <div className={styles.cardOverlay}>
                   <div className={styles.cardSceneName}>{scene.name}</div>
@@ -407,63 +404,60 @@ export default function ScenesPage() {
       <div className={styles.pageBottom} />
 
       {/* Bottom Sheet */}
+      <AnimatePresence>
       {selectedScene && (
         <>
-          <div
+          <motion.div
             className={styles.sheetBackdrop}
             onClick={() => {
               if (!startingSession) setSelectedScene(null);
             }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           />
-          <div className={styles.sheetPanel}>
+          <motion.div
+            className={styles.sheetPanel}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+          >
             <div className={styles.sheetHandle}>
               <div className={styles.sheetHandleBar} />
             </div>
 
-            {selectedScene.image_url ? (
-              <img
-                className={styles.sheetImage}
-                src={selectedScene.image_url}
-                alt={selectedScene.name}
-              />
-            ) : null}
+            {/* Hero with avatar overlay */}
+            <div className={styles.sheetHero}>
+              {selectedScene.image_url ? (
+                <img
+                  className={styles.sheetImage}
+                  src={selectedScene.image_url}
+                  alt={selectedScene.name}
+                />
+              ) : null}
+              {selectedScene.character.avatar_url ? (
+                <img
+                  className={styles.sheetAvatarOverlay}
+                  src={selectedScene.character.avatar_url}
+                  alt={selectedScene.character.name}
+                />
+              ) : null}
+            </div>
 
             <div className={styles.sheetBody}>
-              <div className={styles.sheetCharName}>
-                {selectedScene.character.name}
-                <span
-                  className={`${styles.sheetGenderBadge} ${selectedScene.character.gender === "male" ? styles.sheetGenderBadgeMale : styles.sheetGenderBadgeFemale}`}
-                >
-                  {selectedScene.character.gender === "male" ? "ชาย" : "หญิง"}
-                </span>
-              </div>
-              <div className={styles.sheetSceneName}>{selectedScene.name}</div>
-
-              {/* Preview */}
-              <div className={styles.sheetSection}>
-                <div className={styles.sheetSectionTitle}>ตัวอย่างบทเปิด</div>
-                <div className={styles.previewBox}>
-                  <div className={styles.previewNarrator}>
-                    {selectedScene.opening_narrator}
-                  </div>
-                  <div className={styles.previewDialogue}>
-                    &ldquo;{selectedScene.opening_dialogue}&rdquo;
-                  </div>
+              {/* Character Header */}
+              <div className={styles.sheetCharHeader}>
+                <div className={styles.sheetCharName}>
+                  {selectedScene.character.name}
+                  <span
+                    className={`${styles.sheetGenderBadge} ${selectedScene.character.gender === "male" ? styles.sheetGenderBadgeMale : styles.sheetGenderBadgeFemale}`}
+                  >
+                    {selectedScene.character.gender === "male" ? "ชาย" : "หญิง"}
+                  </span>
                 </div>
-              </div>
-
-              {/* Tags */}
-              <div className={styles.sheetSection}>
-                <div className={styles.sheetSectionTitle}>แท็กตัวละคร</div>
-                <div className={styles.tagRow}>
-                  {selectedScene.character.appearance_tags.map((tag) => (
-                    <span
-                      key={`a-${tag}`}
-                      className={styles.sheetTagAppearance}
-                    >
-                      {tagMap?.get(tag) ?? tag}
-                    </span>
-                  ))}
+                <div className={styles.sheetCharTags}>
                   {selectedScene.character.personality_tags.map((tag) => (
                     <span
                       key={`p-${tag}`}
@@ -472,26 +466,122 @@ export default function ScenesPage() {
                       {tagMap?.get(tag) ?? tag}
                     </span>
                   ))}
+                  {selectedScene.character.appearance_tags.map((tag) => (
+                    <span
+                      key={`a-${tag}`}
+                      className={styles.sheetTagAppearance}
+                    >
+                      {tagMap?.get(tag) ?? tag}
+                    </span>
+                  ))}
                 </div>
               </div>
 
-              {/* Scene Info */}
-              <div className={styles.sheetSection}>
-                <div className={styles.sheetSectionTitle}>ข้อมูลฉาก</div>
-                <div className={styles.infoGrid}>
-                  <div className={styles.infoItem}>
-                    <div className={styles.infoLabel}>สถานที่</div>
-                    <div className={styles.infoValue}>
-                      {selectedScene.location}
+              {/* Character Essence Card */}
+              <div className={styles.essenceCard}>
+                {selectedScene.character.personality && (
+                  <div className={styles.essenceRow}>
+                    <div className={styles.essenceIcon}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 1l1.796 4.858L15 6.5l-3.8 3.142L12.392 15 8 12.2 3.608 15l1.192-5.358L1 6.5l5.204-.642L8 1z" fill="currentColor" opacity="0.85"/>
+                      </svg>
+                    </div>
+                    <div className={styles.essenceContent}>
+                      <div className={styles.essenceLabel}>บุคลิกภาพ</div>
+                      <div
+                        className={`${styles.essenceText} ${expandedPersonality ? styles.essenceTextExpanded : ""}`}
+                      >
+                        {selectedScene.character.personality}
+                      </div>
+                      {selectedScene.character.personality.length > 80 && (
+                        <button
+                          className={styles.essenceToggle}
+                          onClick={() =>
+                            setExpandedPersonality(!expandedPersonality)
+                          }
+                        >
+                          {expandedPersonality ? "ย่อ" : "อ่านเพิ่ม"}
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <div className={styles.infoItem}>
-                    <div className={styles.infoLabel}>อารมณ์</div>
-                    <div className={styles.infoValue}>
-                      {selectedScene.atmosphere_summary}
+                )}
+                {selectedScene.character.background && (
+                  <div className={styles.essenceRow}>
+                    <div className={styles.essenceIcon}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 2.5A1.5 1.5 0 013.5 1h4.379a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0112.5 5.62V13.5A1.5 1.5 0 0111 15H3.5A1.5 1.5 0 012 13.5v-11zM4.5 8a.5.5 0 000 1h5a.5.5 0 000-1h-5zm0 2.5a.5.5 0 000 1h5a.5.5 0 000-1h-5z" fill="currentColor" opacity="0.85"/>
+                      </svg>
+                    </div>
+                    <div className={styles.essenceContent}>
+                      <div className={styles.essenceLabel}>ภูมิหลัง</div>
+                      <div
+                        className={`${styles.essenceText} ${expandedBackground ? styles.essenceTextExpanded : ""}`}
+                      >
+                        {selectedScene.character.background}
+                      </div>
+                      {selectedScene.character.background.length > 80 && (
+                        <button
+                          className={styles.essenceToggle}
+                          onClick={() =>
+                            setExpandedBackground(!expandedBackground)
+                          }
+                        >
+                          {expandedBackground ? "ย่อ" : "อ่านเพิ่ม"}
+                        </button>
+                      )}
                     </div>
                   </div>
+                )}
+              </div>
+
+              {/* Scene Context Card */}
+              <div className={styles.sceneContextCard}>
+                <div className={styles.sceneContextName}>
+                  {selectedScene.name}
                 </div>
+                <div className={styles.sceneContextMeta}>
+                  <span>{selectedScene.location}</span>
+                  <span className={styles.sceneContextDot}>&middot;</span>
+                  <span>{selectedScene.atmosphere_summary}</span>
+                </div>
+              </div>
+
+              {/* Opening Preview (collapsible) */}
+              <div className={styles.sheetSection}>
+                <button
+                  className={styles.sheetSectionToggle}
+                  onClick={() => setOpeningPreviewOpen(!openingPreviewOpen)}
+                >
+                  <span className={styles.sheetSectionTitle}>
+                    ตัวอย่างบทเปิด
+                  </span>
+                  <svg
+                    className={`${styles.chevronIcon} ${openingPreviewOpen ? styles.chevronOpen : ""}`}
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                  >
+                    <path
+                      d="M3.5 5.25L7 8.75L10.5 5.25"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+                {openingPreviewOpen && (
+                  <div className={styles.previewBox}>
+                    <div className={styles.previewNarrator}>
+                      {selectedScene.opening_narrator}
+                    </div>
+                    <div className={styles.previewDialogue}>
+                      &ldquo;{selectedScene.opening_dialogue}&rdquo;
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* CTA */}
@@ -514,9 +604,10 @@ export default function ScenesPage() {
                 <div className={styles.sheetError}>{startError}</div>
               )}
             </div>
-          </div>
+          </motion.div>
         </>
       )}
+      </AnimatePresence>
 
       {/* Confirm Change Dialog */}
       {showConfirmChange && (

@@ -1,0 +1,115 @@
+.centerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  gap: 12px;
+}
+
+.spinnerWrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.spinner {
+  animation: spin 1.2s linear infinite;
+}
+
+.coinIcon {
+  position: absolute;
+  animation: floatCoin 2s ease-in-out infinite;
+}
+
+.statusTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-top: 8px;
+}
+
+.statusText {
+  font-size: 15px;
+  color: var(--gray-500);
+  line-height: 1.6;
+}
+
+.priceText {
+  font-size: 14px;
+  color: var(--gray-400);
+}
+
+.successIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--mint-100), var(--mint-50));
+  margin-bottom: 8px;
+  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.actionBtn {
+  margin-top: 20px;
+  padding: 14px 36px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--gray-200);
+  background: white;
+  color: var(--gray-700);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionBtn:active {
+  transform: scale(0.97);
+}
+
+.successBtn {
+  border-color: var(--mint-300);
+  background: linear-gradient(135deg, var(--mint-400), var(--mint-500));
+  color: white;
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--coral-300);
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes floatCoin {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}

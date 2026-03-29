@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Quicksand, Plus_Jakarta_Sans, IBM_Plex_Sans_Thai } from "next/font/google";
 import { LiffProvider } from "./providers/liff-provider";
+import VConsoleInit from "./components/vconsole";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -30,10 +31,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "TalkRai",
-  description: "AI-powered interactive roleplay chatbot",
+  description: "TalkRai — นิยายแชทบน LINE | สวมบทฟินๆ กับตัวละครที่ชอบ",
   openGraph: {
     title: "TalkRai",
-    description: "AI-powered interactive roleplay chatbot",
+    description: "TalkRai — นิยายแชทบน LINE | สวมบทฟินๆ กับตัวละครที่ชอบ",
     type: "website",
   },
 };
@@ -48,6 +49,7 @@ export default function RootLayout({
       <body
         className={`${quicksand.variable} ${plusJakartaSans.variable} ${ibmPlexSansThai.variable} antialiased`}
       >
+        <VConsoleInit />
         <LiffProvider>{children}</LiffProvider>
       </body>
     </html>

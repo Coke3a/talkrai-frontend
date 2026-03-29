@@ -65,6 +65,18 @@
   }
 }
 
+/* Avatar sparkle decorations */
+.avatarSparkle {
+  position: absolute;
+  z-index: 2;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
 .displayName {
   font-family: var(--font-display);
   font-size: 1.5rem;
@@ -98,12 +110,14 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 12px;
-  font-size: 1.3rem;
+  color: var(--gray-700);
   transition: transform 0.3s ease;
 }
 
-.statCard:hover .statIconWrapper {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .statCard:hover .statIconWrapper {
+    transform: scale(1.1);
+  }
 }
 
 .statIconCoral {
@@ -170,13 +184,35 @@
   padding: 28px 24px;
   text-align: center;
   color: white;
-  animation: fadeInUp 0.6s ease-out 0.45s both;
+  position: relative;
+  overflow: hidden;
+}
+
+.gratitudeCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.1) 45%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 55%,
+    transparent 60%
+  );
+  animation: shimmerSweep 4s ease-in-out infinite;
+}
+
+@keyframes shimmerSweep {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(150%); }
 }
 
 .gratitudeIcon {
-  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 12px;
-  display: block;
 }
 
 .gratitudeTitle {

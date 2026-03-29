@@ -8,75 +8,80 @@ import {
   formatDateShort,
   type CurrentSessionData,
 } from "@/app/lib/api";
+import { PageHeader } from "../components/page-header";
+import { LoadingState } from "../components/loading-state";
+import { ErrorState } from "../components/error-state";
+import { EmptyState } from "../components/empty-state";
+import { SuccessOverlay } from "../components/success-overlay";
+import { getMoodIcon, getRelationshipIcon } from "@/app/lib/icons";
+import { MessageCircle, Calendar, MapPin, Clock, Inbox, HelpCircle } from "lucide-react";
+import { motion } from "framer-motion";
 import styles from "./status.module.css";
 
+const RELATIONSHIP_ORDER = ["stranger", "acquaintance", "friend", "close_friend"];
+function getRelationshipProgress(level: string): number {
+  const idx = RELATIONSHIP_ORDER.indexOf(level);
+  if (idx < 0) return 0;
+  return ((idx + 1) / RELATIONSHIP_ORDER.length) * 100;
+}
+
 const MOOD_MAP: Record<string, {
-  emoji: string;
   label: string;
   desc: string;
   backdropClass: string;
 }> = {
   happy: {
-    emoji: "😊",
     label: "มีความสุข",
     desc: "เธอรู้สึกดีขึ้น เมื่อได้อยู่กับคุณ",
     backdropClass: "moodBackdropHappy",
   },
   sad: {
-    emoji: "😢",
     label: "เศร้า",
     desc: "เธอรู้สึกเศร้าใจอยู่",
     backdropClass: "moodBackdropSad",
   },
   angry: {
-    emoji: "😠",
     label: "โกรธ",
     desc: "เธอรู้สึกหงุดหงิดอยู่",
     backdropClass: "moodBackdropAngry",
   },
   neutral: {
-    emoji: "😐",
     label: "เฉยๆ",
     desc: "เธอรู้สึกเฉยๆ",
     backdropClass: "moodBackdropNeutral",
   },
   excited: {
-    emoji: "🤩",
     label: "ตื่นเต้น",
     desc: "เธอรู้สึกตื่นเต้นมาก",
     backdropClass: "moodBackdropExcited",
   },
   shy: {
-    emoji: "😳",
     label: "อาย",
     desc: "เธอรู้สึกเขินอาย",
     backdropClass: "moodBackdropShy",
   },
   playful: {
-    emoji: "😜",
     label: "ขี้เล่น",
     desc: "เธออารมณ์ดี อยากเล่นสนุก",
     backdropClass: "moodBackdropHappy",
   },
   serious: {
-    emoji: "😐",
     label: "จริงจัง",
     desc: "เธอรู้สึกจริงจังอยู่",
     backdropClass: "moodBackdropNeutral",
   },
   worried: {
-    emoji: "😟",
     label: "เป็นห่วง",
     desc: "เธอรู้สึกกังวลอยู่",
     backdropClass: "moodBackdropSad",
   },
 };
 
-const RELATIONSHIP_MAP: Record<string, { icon: string; label: string }> = {
-  stranger: { icon: "🤝", label: "คนแปลกหน้า" },
-  acquaintance: { icon: "👋", label: "คนรู้จัก" },
-  friend: { icon: "💚", label: "เพื่อน" },
-  close_friend: { icon: "💛", label: "เพื่อนสนิท" },
+const RELATIONSHIP_MAP: Record<string, { label: string }> = {
+  stranger: { label: "คนแปลกหน้า" },
+  acquaintance: { label: "คนรู้จัก" },
+  friend: { label: "เพื่อน" },
+  close_friend: { label: "เพื่อนสนิท" },
 };
 
 const SUMMARY_COLLAPSE_THRESHOLD = 80;
@@ -143,54 +148,29 @@ export default function StatusPage() {
   }, [showSuccess]);
 
   if (!isReady || loading) {
-    return (
-      <div className="page-wrapper">
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="animate-pulse text-center">
-            <div className="mb-3 text-4xl">📖</div>
-            <p className="font-thai text-sm text-tgray-500">Loading...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState title="สถานะเรื่องราว" />;
   }
 
   if (liffError || error) {
     return (
-      <div className="page-wrapper">
-        <div className="flex min-h-screen items-center justify-center px-6">
-          <div className="card rounded-[var(--radius-xl)] p-8 text-center">
-            <div className="mb-4 text-4xl">😢</div>
-            <h1 className="font-display mb-2 text-xl font-semibold text-tgray-900">
-              เกิดข้อผิดพลาด
-            </h1>
-            <p className="font-thai text-sm text-tgray-500">
-              {liffError || error}
-            </p>
-          </div>
-        </div>
-      </div>
+      <ErrorState
+        headerTitle="สถานะเรื่องราว"
+        message={(liffError || error)!}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 
   if (!session) {
     return (
       <div className="page-wrapper">
-        <header className="page-header">
-          <div className="header-inner">
-            <h1 className="header-title">สถานะเรื่องราว</h1>
-          </div>
-        </header>
+        <PageHeader title="สถานะเรื่องราว" />
         <div className="flex min-h-[60vh] items-center justify-center px-6">
-          <div className="card rounded-[var(--radius-xl)] p-8 text-center">
-            <div className="mb-4 text-4xl">📭</div>
-            <h2 className="font-display mb-2 text-lg font-semibold text-tgray-900">
-              ยังไม่มีเรื่องราว
-            </h2>
-            <p className="font-thai text-sm text-tgray-500">
-              เลือกเรื่องที่ชอบแล้วเริ่มแชทกับตัวละครได้เลย!
-            </p>
-          </div>
+          <EmptyState
+            icon={Inbox}
+            title="ยังไม่มีเรื่องราว"
+            subtitle="เลือกเรื่องที่ชอบแล้วเริ่มแชทกับตัวละครได้เลย!"
+          />
         </div>
       </div>
     );
@@ -212,11 +192,7 @@ export default function StatusPage() {
   return (
     <div className="page-wrapper">
       {/* Header */}
-      <header className="page-header">
-        <div className="header-inner">
-          <h1 className="header-title">สถานะเรื่องราว</h1>
-        </div>
-      </header>
+      <PageHeader title="สถานะเรื่องราว" />
 
       {/* Main Content */}
       <main className="pb-28">
@@ -239,12 +215,12 @@ export default function StatusPage() {
             <div className={styles.badgeRow}>
               {session.current_location ? (
                 <span className={`font-thai ${styles.badge}`}>
-                  📍 {session.current_location}
+                  <MapPin size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 2 }} /> {session.current_location}
                 </span>
               ) : null}
               {session.scene_time ? (
                 <span className={`font-thai ${styles.badge}`}>
-                  🕐 {session.scene_time}
+                  <Clock size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 2 }} /> {session.scene_time}
                 </span>
               ) : null}
             </div>
@@ -252,14 +228,23 @@ export default function StatusPage() {
         </section>
 
         {/* Mood Section */}
-        <div className="mt-8 px-5">
+        <motion.div
+          className="mt-8 px-5"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+        >
           <span className="section-label">อารมณ์</span>
           <div className={`card ${styles.moodCard}`}>
             <div className={styles.moodInner}>
               <div
                 className={`${styles.moodBackdrop} ${styles[moodData.backdropClass]}`}
+                style={{ animation: "bobFloat 3s ease-in-out infinite" }}
               >
-                {moodData.emoji}
+                {(() => {
+                  const MoodIcon = getMoodIcon(session.mood);
+                  return <MoodIcon size={24} />;
+                })()}
               </div>
               <div>
                 <div className={styles.moodLabel}>{moodData.label}</div>
@@ -269,20 +254,55 @@ export default function StatusPage() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Relationship Level */}
-        <div className="mt-6 px-5">
+        <motion.div
+          className="mt-6 px-5"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+        >
           <span className="section-label">ความสัมพันธ์</span>
           <div className={`card ${styles.relationshipCard}`}>
             <div className={styles.relationshipInner}>
-              <span className={styles.relationshipIcon}>{relData.icon}</span>
+              {(() => {
+                const RelIcon = getRelationshipIcon(session.relationship_level);
+                return (
+                  <span className={styles.relationshipIcon}>
+                    <RelIcon size={22} />
+                  </span>
+                );
+              })()}
               <span className={`font-thai ${styles.relationshipLevel}`}>
                 {relData.label}
               </span>
             </div>
+            {/* Progress bar */}
+            <div className={styles.progressTrack}>
+              <motion.div
+                className={styles.progressFill}
+                initial={{ width: 0 }}
+                animate={{ width: `${getRelationshipProgress(session.relationship_level)}%` }}
+                transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+              />
+              <div className={styles.progressLabels}>
+                {RELATIONSHIP_ORDER.map((level) => (
+                  <span
+                    key={level}
+                    className={styles.progressDot}
+                    style={{
+                      left: `${((RELATIONSHIP_ORDER.indexOf(level) + 1) / RELATIONSHIP_ORDER.length) * 100}%`,
+                      background: RELATIONSHIP_ORDER.indexOf(level) < RELATIONSHIP_ORDER.indexOf(session.relationship_level) + 1
+                        ? "var(--coral-500)"
+                        : "var(--gray-300)",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Scene Summary */}
         {sceneSummary && (
@@ -309,12 +329,12 @@ export default function StatusPage() {
           <span className="section-label">สถิติ</span>
           <div className={styles.statsGrid}>
             <div className={`card ${styles.statCard}`}>
-              <div className={styles.statIconWrapper}>💬</div>
+              <div className={styles.statIconWrapper}><MessageCircle size={20} color="var(--coral-500)" /></div>
               <div className={styles.statValue}>{session.message_count}</div>
               <div className={`font-thai ${styles.statLabel}`}>ข้อความทั้งหมด</div>
             </div>
             <div className={`card ${styles.statCard}`}>
-              <div className={styles.statIconWrapper}>📅</div>
+              <div className={styles.statIconWrapper}><Calendar size={20} color="var(--coral-500)" /></div>
               <div className={`font-thai ${styles.statValue}`}>
                 {formatDateShort(session.created_at)}
               </div>
@@ -344,7 +364,9 @@ export default function StatusPage() {
             className={styles.dialog}
             onClick={(e) => e.stopPropagation()}
           >
-            <span className={styles.dialogIcon}>❓</span>
+            <div className={styles.dialogIcon} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 56, borderRadius: '50%', background: 'var(--coral-50)' }}>
+              <HelpCircle size={28} color="var(--coral-500)" />
+            </div>
             <h3 className={styles.dialogTitle}>จบเรื่องราวนี้?</h3>
             <p className={`font-thai ${styles.dialogMessage}`}>
               เมื่อจบเรื่องแล้ว คุณจะไม่สามารถส่งข้อความในเรื่องนี้ได้อีก
@@ -370,12 +392,11 @@ export default function StatusPage() {
 
       {/* Success State */}
       {showSuccess && (
-        <div className={styles.successOverlay}>
-          <div className={styles.successCircle}>
-            <span className={styles.successCheck}>✓</span>
-          </div>
-          <p className={styles.successText}>จบเรื่องราวเรียบร้อยแล้ว</p>
-        </div>
+        <SuccessOverlay
+          title="จบเรื่องราวเรียบร้อยแล้ว"
+          subtitle="คุณสามารถเลือกเรื่องใหม่ได้ตลอดเวลา"
+          showLineButton={!isInClient}
+        />
       )}
     </div>
   );
