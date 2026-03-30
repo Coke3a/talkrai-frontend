@@ -21,10 +21,13 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Type check
-        run: tsc --noEmit
       - name: Lint
         run: pnpm lint
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_LIFF_ID: "2009434682-pfXCyzxv"
+          NEXT_PUBLIC_API_URL: "https://api.talkrai.app"
 
   deploy:
     name: Deploy
