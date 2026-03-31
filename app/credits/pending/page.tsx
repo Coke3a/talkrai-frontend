@@ -32,6 +32,7 @@ function PendingContent() {
 
   const [status, setStatus] = useState<PaymentStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const pollCountRef = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -68,6 +69,30 @@ function PendingContent() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isReady, liff, liffError, orderId]);
+
+  const isCompleted = status?.status === "completed";
+
+  useEffect(() => {
+    if (!isCompleted) return;
+    setCountdown(5);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isCompleted]);
+
+  useEffect(() => {
+    if (countdown === 0) {
+      handleGoToCredits();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown]);
 
   const handleGoToCredits = () => {
     if (status?.status === "completed") {
@@ -106,7 +131,6 @@ function PendingContent() {
   }
 
   const isPending = !status || status.status === "pending";
-  const isCompleted = status?.status === "completed";
   const isFailed = status?.status === "failed" || status?.status === "expired";
 
   return (
@@ -163,11 +187,16 @@ function PendingContent() {
               <p className={`${styles.priceText} font-thai`}>
                 {status.price_thb} บาท
               </p>
+              {countdown !== null && countdown > 0 && (
+                <p className={`${styles.countdownText} font-thai`}>
+                  กลับหน้าเครดิตอัตโนมัติใน {countdown} วินาที...
+                </p>
+              )}
               <button
                 className={`${styles.actionBtn} ${styles.successBtn} font-thai`}
                 onClick={handleGoToCredits}
               >
-                กลับหน้าเครดิต
+                กลับหน้าเครดิต{countdown !== null && countdown > 0 ? ` (${countdown})` : ""}
               </button>
             </motion.div>
           )}
