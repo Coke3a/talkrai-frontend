@@ -16,7 +16,7 @@ import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
 import { ErrorState } from "../components/error-state";
 import { EmptyState } from "../components/empty-state";
-import { SuccessOverlay } from "../components/success-overlay";
+import { ToastBanner } from "../components/success-overlay";
 import { getTransactionIcon } from "@/app/lib/icons";
 import { Coffee, Sparkles, Gem, TrendingUp, MessageCircle, AlertTriangle, Receipt, Coins } from "lucide-react";
 import styles from "./credits.module.css";
@@ -88,8 +88,7 @@ function CreditsContent() {
   const [totalTransactions, setTotalTransactions] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [successCredits, setSuccessCredits] = useState(0);
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   useEffect(() => {
     if (!isReady || !liff || liffError) return;
@@ -104,12 +103,16 @@ function CreditsContent() {
         setTransactions(txData.transactions);
         setTotalTransactions(txData.total);
 
-        // Show success overlay if redirected from payment
+        // Show toast if redirected from payment
         const success = searchParams.get("success");
         const credits = searchParams.get("credits");
+        const failed = searchParams.get("failed");
         if (success === "true" && credits) {
-          setSuccessCredits(parseInt(credits, 10));
-          setShowSuccess(true);
+          setToast({ type: "success", message: `เติมเครดิตสำเร็จ! ได้รับ +${credits} เครดิต` });
+          window.history.replaceState(null, "", "/credits");
+        } else if (failed === "true") {
+          setToast({ type: "error", message: "การชำระเงินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" });
+          window.history.replaceState(null, "", "/credits");
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
@@ -272,10 +275,11 @@ function CreditsContent() {
         </div>
       </main>
 
-      {showSuccess && (
-        <SuccessOverlay
-          title="เติมเครดิตสำเร็จ!"
-          subtitle={`ได้รับ +${successCredits} เครดิต`}
+      {toast && (
+        <ToastBanner
+          variant={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
         />
       )}
     </div>

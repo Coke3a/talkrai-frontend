@@ -75,7 +75,7 @@ function PendingContent() {
         `/credits?success=true&credits=${status.credits_amount}`
       );
     } else {
-      router.push("/credits");
+      router.push("/credits?failed=true");
     }
   };
 
@@ -95,7 +95,7 @@ function PendingContent() {
             </p>
             <button
               className={`${styles.actionBtn} font-thai`}
-              onClick={() => router.push("/credits")}
+              onClick={() => router.push("/credits?failed=true")}
             >
               กลับหน้าเครดิต
             </button>
@@ -189,7 +189,7 @@ function PendingContent() {
               </p>
               <button
                 className={`${styles.actionBtn} font-thai`}
-                onClick={() => router.push("/credits")}
+                onClick={() => router.push("/credits?failed=true")}
               >
                 กลับหน้าเครดิต
               </button>
