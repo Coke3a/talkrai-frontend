@@ -188,7 +188,7 @@ export default function Home() {
         )}
 
         {/* Quick Actions */}
-        <div style={{ padding: "24px 0 40px" }}>
+        {isLoggedIn && <div style={{ padding: "24px 0 40px" }}>
           <span className="section-label">เมนูลัด</span>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
             {[
@@ -224,7 +224,7 @@ export default function Home() {
               );
             })}
           </div>
-        </div>
+        </div>}
       </main>
     </div>
   );
@@ -245,11 +245,12 @@ function StatusRow({
     <div className="flex items-center gap-3">
       <span className="flex items-center justify-center" style={{ width: 24, height: 24 }}>{icon}</span>
       <div className="flex-1">
-        <span className="font-display text-xs font-bold uppercase tracking-wide text-tgray-500">
+        <span className="font-display text-xs font-bold uppercase tracking-wide" style={{ color: "var(--gray-500)" }}>
           {label}
         </span>
         <p
-          className={`font-thai text-sm font-semibold ${active ? "text-tgray-900" : "text-tgray-400"}`}
+          className="font-thai text-sm font-semibold"
+          style={{ color: active ? "var(--gray-900)" : "var(--gray-400)" }}
         >
           {value}
         </p>

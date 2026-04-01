@@ -87,7 +87,7 @@ const RELATIONSHIP_MAP: Record<string, { label: string }> = {
 const SUMMARY_COLLAPSE_THRESHOLD = 80;
 
 export default function StatusPage() {
-  const { isReady, liff, liffError, isInClient } = useLiff();
+  const { isReady, liff, liffError, isInClient, isLoggedIn } = useLiff();
   const [session, setSession] = useState<CurrentSessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +97,10 @@ export default function StatusPage() {
   const [ending, setEnding] = useState(false);
 
   useEffect(() => {
-    if (!isReady || !liff || liffError) return;
+    if (!isReady || !liff || liffError || !isLoggedIn) {
+      if (isReady) setLoading(false);
+      return;
+    }
 
     const loadData = async () => {
       try {
@@ -111,7 +114,7 @@ export default function StatusPage() {
     };
 
     loadData();
-  }, [isReady, liff, liffError]);
+  }, [isReady, liff, liffError, isLoggedIn]);
 
   const handleEndStory = useCallback(() => {
     setShowConfirm(true);
@@ -161,6 +164,32 @@ export default function StatusPage() {
     );
   }
 
+  if (!isLoggedIn) {
+    return (
+      <div className="page-wrapper">
+        <PageHeader title="สถานะเรื่องราว" />
+        <div className="flex min-h-[60vh] items-center justify-center px-6">
+          <div className="text-center">
+            <p className="font-thai text-base" style={{ color: "var(--gray-500)", marginBottom: 16 }}>
+              กรุณาเข้าสู่ระบบเพื่อดูสถานะเรื่องราว
+            </p>
+            {liff && (
+              <button
+                onClick={() => liff.login()}
+                className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+                style={{
+                  background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
+                }}
+              >
+                เข้าสู่ระบบด้วย LINE
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <div className="page-wrapper">
@@ -204,6 +233,7 @@ export default function StatusPage() {
               src={imageUrl}
               alt={session.character_name}
               className={styles.heroImage}
+              onError={(e) => { e.currentTarget.src = `https://api.dicebear.com/9.x/adventurer/svg?seed=${session.character_name}&backgroundColor=ffd5dc&scale=110`; }}
             />
             <div className={styles.heroGradient} />
           </div>

@@ -81,7 +81,7 @@ export default function CreditsPage() {
 }
 
 function CreditsContent() {
-  const { isReady, liff, liffError } = useLiff();
+  const { isReady, liff, liffError, isLoggedIn } = useLiff();
   const searchParams = useSearchParams();
   const [balance, setBalance] = useState<CreditBalance | null>(null);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
@@ -147,6 +147,32 @@ function CreditsContent() {
         message={(liffError || error)!}
         onRetry={() => window.location.reload()}
       />
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="page-wrapper">
+        <PageHeader title="เครดิต" />
+        <div className="flex min-h-[60vh] items-center justify-center px-6">
+          <div className="text-center">
+            <p className="font-thai text-base" style={{ color: "var(--gray-500)", marginBottom: 16 }}>
+              กรุณาเข้าสู่ระบบเพื่อดูเครดิต
+            </p>
+            {liff && (
+              <button
+                onClick={() => liff.login()}
+                className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+                style={{
+                  background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
+                }}
+              >
+                เข้าสู่ระบบด้วย LINE
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -233,7 +259,7 @@ function CreditsContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 + i * 0.1, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
               >
-                <PackageCard pkg={pkg} />
+                <PackageCard pkg={pkg} onError={(msg) => setToast({ type: "error", message: msg })} />
               </motion.div>
             ))}
           </div>
@@ -289,8 +315,10 @@ function CreditsContent() {
 // ── Package Card ───────────────────────────────────────────
 function PackageCard({
   pkg,
+  onError,
 }: {
   pkg: (typeof PACKAGES)[number];
+  onError: (message: string) => void;
 }) {
   const [purchasing, setPurchasing] = useState(false);
   const perCredit = (pkg.price / pkg.credits).toFixed(2);
@@ -304,7 +332,7 @@ function PackageCard({
       window.location.href = result.payment_url;
     } catch (err) {
       setPurchasing(false);
-      alert(err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองใหม่");
+      onError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองใหม่");
     }
   };
 

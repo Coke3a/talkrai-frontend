@@ -28,7 +28,8 @@ function PendingContent() {
   const { isReady, liff, liffError } = useLiff();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const orderId = searchParams.get("id");
+  const rawOrderId = searchParams.get("id");
+  const orderId = rawOrderId && /^[a-zA-Z0-9_-]+$/.test(rawOrderId) ? rawOrderId : null;
 
   const [status, setStatus] = useState<PaymentStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);

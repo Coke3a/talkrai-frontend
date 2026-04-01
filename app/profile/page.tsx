@@ -24,13 +24,17 @@ function formatMemberSince(dateStr: string): string {
 }
 
 export default function ProfilePage() {
-  const { isReady, liffError, liff } = useLiff();
+  const { isReady, liffError, liff, isLoggedIn } = useLiff();
   const [lineProfile, setLineProfile] = useState<LineProfile | null>(null);
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isReady || !liff || liffError) return;
+    if (!isReady || !liff || liffError || !isLoggedIn) {
+      if (isReady) setLoading(false);
+      return;
+    }
 
     const loadData = async () => {
       try {
@@ -46,13 +50,15 @@ export default function ProfilePage() {
         setStats(profileStats);
       } catch (err) {
         setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
+      } finally {
+        setLoading(false);
       }
     };
 
     loadData();
-  }, [isReady, liff, liffError]);
+  }, [isReady, liff, liffError, isLoggedIn]);
 
-  if (!isReady || (!lineProfile && !error && !liffError)) {
+  if (!isReady || loading) {
     return <LoadingState title="โปรไฟล์" />;
   }
 
@@ -63,6 +69,32 @@ export default function ProfilePage() {
         message={(liffError || error)!}
         onRetry={() => window.location.reload()}
       />
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="page-wrapper">
+        <PageHeader title="โปรไฟล์" />
+        <div className="flex min-h-[60vh] items-center justify-center px-6">
+          <div className="text-center">
+            <p className="font-thai text-base" style={{ color: "var(--gray-500)", marginBottom: 16 }}>
+              กรุณาเข้าสู่ระบบเพื่อดูโปรไฟล์
+            </p>
+            {liff && (
+              <button
+                onClick={() => liff.login()}
+                className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+                style={{
+                  background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
+                }}
+              >
+                เข้าสู่ระบบด้วย LINE
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -108,6 +140,7 @@ export default function ProfilePage() {
                 src={pictureUrl}
                 alt={displayName}
                 className={styles.avatar}
+                onError={(e) => { e.currentTarget.src = `https://api.dicebear.com/9.x/adventurer/svg?seed=${displayName}`; }}
               />
             </div>
 

@@ -35,6 +35,14 @@ export const metadata: Metadata = {
     title: "TalkRai",
     description: "TalkRai — นิยายแชทบน LINE | สวมบทฟินๆ กับตัวละครที่ชอบ",
     type: "website",
+    images: [
+      {
+        url: "https://talkrai.app/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "TalkRai — AI Interactive Roleplay on LINE",
+      },
+    ],
   },
 };
 

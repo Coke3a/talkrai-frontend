@@ -119,16 +119,17 @@ export default function ScenesPage() {
   // ── Data Fetching ────────────────────────────────────
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady || !isLoggedIn) {
+      if (isReady) setLoading(false);
+      return;
+    }
 
     async function loadData() {
       try {
         const [scenesData, tagsData, sessionData] = await Promise.all([
           fetchScenes(),
           fetchTags(),
-          isLoggedIn
-            ? fetchCurrentSession().then((r) => r.session)
-            : Promise.resolve(null),
+          fetchCurrentSession().then((r) => r.session),
         ]);
 
         setScenes(scenesData);
@@ -264,6 +265,34 @@ export default function ScenesPage() {
     );
   }
 
+  // ── Not Logged In ────────────────────────────────────
+
+  if (!isLoggedIn) {
+    return (
+      <div className="page-wrapper">
+        <PageHeader title="เลือกฉาก" />
+        <div className="flex min-h-[60vh] items-center justify-center px-6">
+          <div className="text-center">
+            <p className="font-thai text-base" style={{ color: "var(--gray-500)", marginBottom: 16 }}>
+              กรุณาเข้าสู่ระบบเพื่อดูฉากทั้งหมด
+            </p>
+            {liff && (
+              <button
+                onClick={() => liff.login()}
+                className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+                style={{
+                  background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
+                }}
+              >
+                เข้าสู่ระบบด้วย LINE
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Success State (external browser) ────────────────
 
   if (showSuccess) {
@@ -318,6 +347,7 @@ export default function ScenesPage() {
                 className={styles.sessionAvatar}
                 src={currentSession.character_avatar_url}
                 alt={currentSession.character_name}
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             ) : null}
             <div className={styles.sessionInfo}>
@@ -374,6 +404,7 @@ export default function ScenesPage() {
                     src={scene.image_url}
                     alt={scene.name}
                     loading="lazy"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 ) : (
                   <div className={styles.cardFallback}><ImageOff size={32} color="var(--gray-300)" /></div>
@@ -435,6 +466,7 @@ export default function ScenesPage() {
                   className={styles.sheetImage}
                   src={selectedScene.image_url}
                   alt={selectedScene.name}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               ) : null}
               {selectedScene.character.avatar_url ? (
@@ -442,6 +474,7 @@ export default function ScenesPage() {
                   className={styles.sheetAvatarOverlay}
                   src={selectedScene.character.avatar_url}
                   alt={selectedScene.character.name}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               ) : null}
             </div>
