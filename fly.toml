@@ -2,7 +2,7 @@ app = 'talkrai-frontend'
 primary_region = 'sin'
 
 [build.args]
-  NEXT_PUBLIC_LIFF_ID = "2009434682-pfXCyzxv"
+  NEXT_PUBLIC_LIFF_ID = "2009434684-FmIDtNRF"
   NEXT_PUBLIC_API_URL = "https://api.talkrai.app"
 
 [http_service]
