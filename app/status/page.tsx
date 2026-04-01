@@ -215,8 +215,8 @@ export default function StatusPage() {
       : sceneSummary.slice(0, SUMMARY_COLLAPSE_THRESHOLD) + "...";
 
   const imageUrl =
-    session.character_avatar_url ??
-    `https://api.dicebear.com/9.x/adventurer/svg?seed=${session.character_name}&backgroundColor=ffd5dc&scale=110`;
+    session.scene_image_url ??
+    `https://api.dicebear.com/9.x/adventurer/svg?seed=${session.scene_name}&backgroundColor=b6e3f4&scale=110`;
 
   return (
     <div className="page-wrapper">
@@ -233,7 +233,7 @@ export default function StatusPage() {
               src={imageUrl}
               alt={session.character_name}
               className={styles.heroImage}
-              onError={(e) => { e.currentTarget.src = `https://api.dicebear.com/9.x/adventurer/svg?seed=${session.character_name}&backgroundColor=ffd5dc&scale=110`; }}
+              onError={(e) => { e.currentTarget.src = `https://api.dicebear.com/9.x/adventurer/svg?seed=${session.scene_name}&backgroundColor=b6e3f4&scale=110`; }}
             />
             <div className={styles.heroGradient} />
           </div>
