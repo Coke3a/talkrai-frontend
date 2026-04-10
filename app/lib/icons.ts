@@ -1,14 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  Flame,
-  HeartCrack,
-  Sun,
-  Moon,
-  Heart,
-  Flower2,
   Sparkles,
-  Gem,
-  Clock,
   MessageCircle,
   CreditCard,
   Gift,
@@ -21,28 +13,12 @@ import {
   Meh,
   Laugh,
   AlertCircle,
+  HeartCrack,
+  Heart,
   UserPlus,
   Hand,
   HeartHandshake,
 } from "lucide-react";
-
-// ── Scene Category Icons ─────────────────────────────────
-
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  popular: Flame,
-  tsundere: HeartCrack,
-  cheerful: Sun,
-  mysterious: Moon,
-  caring: Heart,
-  shy: Flower2,
-  flirty: Sparkles,
-  cool: Gem,
-  latest: Clock,
-};
-
-export function getCategoryIcon(key: string): LucideIcon {
-  return CATEGORY_ICONS[key] ?? Sparkles;
-}
 
 // ── Transaction Icons ────────────────────────────────────
 

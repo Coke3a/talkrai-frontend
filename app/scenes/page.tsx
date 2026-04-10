@@ -13,7 +13,6 @@ import {
 import { PageHeader } from "../components/page-header";
 import { ErrorState } from "../components/error-state";
 import { SuccessOverlay } from "../components/success-overlay";
-import { getCategoryIcon } from "@/app/lib/icons";
 import { ImageOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./scenes.module.css";
@@ -29,57 +28,77 @@ interface CurrentSessionSummary {
 
 type GenderFilter = "all" | "male" | "female";
 
-// ── Category Definitions ──────────────────────────────────
+// ── Tag Taglines & Colors ──────────────────────────────────
 
-const CATEGORY_ROWS: {
-  key: string;
-  label: string;
-  filter: (s: SceneItem) => boolean;
-  sortLatest?: boolean;
-}[] = [
-  { key: "popular", label: "ยอดนิยม", filter: () => true },
+const TAG_TAGLINES: Record<string, { tagline: string; color: string }> = {
+  tsundere: { tagline: "ปากไม่ตรงกับใจ", color: "#F96D4B" },
+  cheerful: { tagline: "ยิ้มทั้งวัน หัวเราะทั้งคืน", color: "#F5A623" },
+  caring: { tagline: "คนที่จะดูแลเธอเสมอ", color: "#FF8FAB" },
+  mysterious: { tagline: "รู้ทุกอย่าง แต่ไม่บอกสักคำ", color: "#8B6BF0" },
+  shy: { tagline: "แก้มแดงง่ายกว่าที่คิด", color: "#A48BFF" },
+  confident: { tagline: "ไม่แคร์สายตาใคร", color: "#D4A017" },
+  flirty: { tagline: "หยุดใจไม่อยู่ ถอนตัวไม่ทัน", color: "#E91E76" },
+  serious: { tagline: "จริงจัง ไม่เล่นๆ", color: "#7D7368" },
+  sensitive: { tagline: "หัวใจบาง รู้สึกลึกกว่าใคร", color: "#6BA3F0" },
+  cute: { tagline: "น่ารักจนต้องมองซ้ำ", color: "#FF8FAB" },
+  cool: { tagline: "เท่จนใจสั่น", color: "#5E564D" },
+  elegant: { tagline: "สง่างาม ดูแพงทุกมุม", color: "#8B6BF0" },
+  sporty: { tagline: "พลังเหลือเฟือ หัวใจนักสู้", color: "#F5A623" },
+  gentle_look: { tagline: "อ่อนโยนจนใจละลาย", color: "#A48BFF" },
+  wild: { tagline: "อันตราย แต่เสน่ห์แรง", color: "#F96D4B" },
+  intellectual: { tagline: "ฉลาดจนน่าหลงใหล", color: "#6BA3F0" },
+};
+
+const WELCOME_MESSAGES: { text: string; sub: string }[] = [
   {
-    key: "tsundere",
-    label: "ซึนเดเระ — ปากร้ายแต่ใจดี",
-    filter: (s) => s.character.personality_tags.includes("tsundere"),
+    text: "วันนี้อยากคุยกับใคร?",
+    sub: "เลือกคนที่สนใจ แล้วเริ่มบทสนทนาที่ไม่เหมือนใคร",
   },
   {
-    key: "cheerful",
-    label: "สดใส เต็มพลัง",
-    filter: (s) => s.character.personality_tags.includes("cheerful"),
+    text: "พร้อมเจอคนใหม่ไหม?",
+    sub: "ทุกการพบกันคือจุดเริ่มต้นของเรื่องราว",
   },
   {
-    key: "mysterious",
-    label: "ลึกลับ ชวนค้นหา",
-    filter: (s) => s.character.personality_tags.includes("mysterious"),
+    text: "ใครจะมาเติมเต็มวันนี้ของเธอ?",
+    sub: "แต่ละตัวละครมีชีวิตเป็นของตัวเอง กดเลือกเลย",
   },
   {
-    key: "caring",
-    label: "อ่อนโยน ดูแลเธอเสมอ",
-    filter: (s) => s.character.personality_tags.includes("caring"),
+    text: "เรื่องราวดีๆ กำลังรอเธออยู่",
+    sub: "บทสนทนาที่จะเกิดขึ้น ขึ้นอยู่กับเธอ",
   },
   {
-    key: "shy",
-    label: "ขี้อาย แต่น่าค้นหา",
-    filter: (s) => s.character.personality_tags.includes("shy"),
-  },
-  {
-    key: "flirty",
-    label: "มีเสน่ห์ หยุดใจไม่อยู่",
-    filter: (s) => s.character.personality_tags.includes("flirty"),
-  },
-  {
-    key: "cool",
-    label: "เท่ มีออร่า",
-    filter: (s) => s.character.appearance_tags.includes("cool"),
-  },
-  {
-    key: "latest",
-    label: "ใหม่ล่าสุด",
-    filter: () => true,
-    sortLatest: true,
+    text: "ตัวละครใหม่ เรื่องราวใหม่",
+    sub: "ทุกฉากเขียนขึ้นมาเพื่อเธอ",
   },
 ];
+
+interface Section {
+  key: string;
+  title: string;
+  color: string;
+  items: SceneItem[];
+}
+
+function dateSeed(): number {
+  const d = new Date().toISOString().slice(0, 10);
+  let h = 0;
+  for (let i = 0; i < d.length; i++) h = (h * 31 + d.charCodeAt(i)) | 0;
+  return Math.abs(h) || 1;
+}
+
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  let s = seed;
+  const rng = () => {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
 
 // ── Tag Map Builder ──────────────────────────────────────
 
@@ -110,6 +129,9 @@ export default function ScenesPage() {
   const [startingSession, setStartingSession] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Latest section load-more
+  const [latestLimit, setLatestLimit] = useState(20);
 
   // Bottom sheet detail states
   const [expandedPersonality, setExpandedPersonality] = useState(false);
@@ -163,20 +185,75 @@ export default function ScenesPage() {
     return scenes.filter((s) => s.character.gender === genderFilter);
   }, [scenes, genderFilter]);
 
-  const categories = useMemo(() => {
-    return CATEGORY_ROWS.map((row) => {
-      let items = filteredScenes.filter(row.filter);
-      if (row.sortLatest) {
-        items = [...items].sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-      }
-      if (row.key === "popular") {
-        items = items.slice(0, 12);
-      }
-      return { ...row, items };
-    }).filter((row) => row.items.length > 0);
+  // ── Daily Welcome Message ────────────────────────────
+
+  const welcomeMsg = useMemo(() => {
+    const seed = dateSeed();
+    return WELCOME_MESSAGES[seed % WELCOME_MESSAGES.length];
+  }, []);
+
+  // ── Sections (popular + 4 tag sections + latest) ─────
+
+  const sections = useMemo(() => {
+    const seed = dateSeed();
+    const result: Section[] = [];
+    const usedIds = new Set<string>();
+
+    // 1. ยอดฮิต — seeded-random (real popularity logic later)
+    const popular = seededShuffle(filteredScenes, seed).slice(0, 8);
+    if (popular.length > 0) {
+      result.push({
+        key: "popular",
+        title: "ยอดฮิต",
+        color: "var(--coral-500)",
+        items: popular,
+      });
+      for (const s of popular) usedIds.add(s.id);
+    }
+
+    // 2. 4 random tag sections — exclude already-shown characters
+    const allTagKeys = seededShuffle(Object.keys(TAG_TAGLINES), seed + 1);
+    let tagCount = 0;
+
+    for (const tagKey of allTagKeys) {
+      if (tagCount >= 4) break;
+
+      const matching = filteredScenes.filter(
+        (s) =>
+          !usedIds.has(s.id) &&
+          (s.character.personality_tags.includes(tagKey) ||
+            s.character.appearance_tags.includes(tagKey))
+      );
+
+      if (matching.length < 2) continue;
+
+      const items = seededShuffle(matching, seed + tagCount + 2).slice(0, 6);
+      const tagInfo = TAG_TAGLINES[tagKey];
+      result.push({
+        key: tagKey,
+        title: tagInfo.tagline,
+        color: tagInfo.color,
+        items,
+      });
+      for (const s of items) usedIds.add(s.id);
+      tagCount++;
+    }
+
+    // 3. ล่าสุด — all scenes sorted by newest (full list, sliced in JSX)
+    const latest = [...filteredScenes].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    if (latest.length > 0) {
+      result.push({
+        key: "latest",
+        title: "ล่าสุด",
+        color: "var(--gray-600)",
+        items: latest,
+      });
+    }
+
+    return result;
   }, [filteredScenes]);
 
   // ── Session Start Flow ───────────────────────────────
@@ -225,7 +302,7 @@ export default function ScenesPage() {
   if (!isReady || loading) {
     return (
       <div className="page-wrapper">
-        <PageHeader title="เลือกฉาก" />
+        <PageHeader title="ค้นหาเรื่องราว" />
         <div className={styles.genderToggle}>
           <div className={styles.genderPill}>
             {["ทั้งหมด", "ชาย", "หญิง"].map((label) => (
@@ -236,14 +313,14 @@ export default function ScenesPage() {
           </div>
         </div>
         {[1, 2, 3].map((i) => (
-          <div key={i} className={styles.skeletonRow}>
-            <div className={styles.skeletonTitle} />
-            <div className={styles.skeletonTrack}>
+          <div key={i} className={styles.skeletonSection}>
+            <div className={styles.skeletonSectionTitle} />
+            <div className={styles.skeletonScrollTrack}>
               {[1, 2, 3, 4].map((j) => (
                 <div
                   key={j}
-                  className={styles.skeletonCard}
-                  style={{ animationDelay: `${j * 0.15}s` }}
+                  className={styles.skeletonScrollCard}
+                  style={{ animationDelay: `${(i * 4 + j) * 0.06}s` }}
                 />
               ))}
             </div>
@@ -270,7 +347,7 @@ export default function ScenesPage() {
   if (!isLoggedIn) {
     return (
       <div className="page-wrapper">
-        <PageHeader title="เลือกฉาก" />
+        <PageHeader title="ค้นหาเรื่องราว" />
         <div className="flex min-h-[60vh] items-center justify-center px-6">
           <div className="text-center">
             <p className="font-thai text-base" style={{ color: "var(--gray-500)", marginBottom: 16 }}>
@@ -310,7 +387,7 @@ export default function ScenesPage() {
   return (
     <div className="page-wrapper">
       {/* Header */}
-      <PageHeader title="เลือกฉาก" />
+      <PageHeader title="ค้นหาเรื่องราว" />
 
       {/* Gender Toggle */}
       <div className={styles.genderToggle}>
@@ -361,76 +438,117 @@ export default function ScenesPage() {
           </div>
         ) : (
           <div>
-            <div className={styles.welcomeText}>เลือกฉากที่สนใจ</div>
-            <div className={styles.welcomeSub}>
-              แต่ละฉากคือเรื่องราวใหม่ กดเลือกแล้วเริ่มแชทได้เลย
-            </div>
+            <div className={styles.welcomeText}>{welcomeMsg.text}</div>
+            <div className={styles.welcomeSub}>{welcomeMsg.sub}</div>
           </div>
         )}
       </div>
 
-      {/* Category Rows */}
-      {categories.map((category, idx) => (
-        <div
-          key={category.key}
-          className={styles.categorySection}
-          style={{ animationDelay: `${idx * 0.08}s` }}
-        >
-          <div className={styles.categoryHeader}>
-            <div className={styles.categoryTitle}>
-              {(() => {
-                const Icon = getCategoryIcon(category.key);
-                return <Icon size={16} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6, opacity: 0.75 }} />;
-              })()}
-              {category.label}
-            </div>
-          </div>
-          <div className={styles.scrollTrack}>
-            {category.items.map((scene) => (
-              <div
-                key={`${category.key}-${scene.id}`}
-                className={styles.sceneCard}
-                onClick={() => {
-                  setSelectedScene(scene);
-                  setStartError(null);
-                  setExpandedPersonality(false);
-                  setExpandedBackground(false);
-                  setOpeningPreviewOpen(false);
-                }}
+      {/* Sections */}
+      {sections.map((section, idx) => {
+        const isGrid = section.key === "latest";
+        const cardClass = isGrid ? styles.gridCard : styles.scrollCard;
+        const displayItems = isGrid
+          ? section.items.slice(0, latestLimit)
+          : section.items;
+        const hasMore = isGrid && section.items.length > latestLimit;
+
+        return (
+          <div
+            key={section.key}
+            className={styles.section}
+            style={{ animationDelay: `${idx * 0.08}s` }}
+          >
+            <div className={styles.sectionHeader}>
+              <span
+                className={styles.sectionTitle}
+                style={{ borderColor: section.color }}
               >
-                {scene.image_url ? (
-                  <img
-                    className={styles.cardImage}
-                    src={scene.image_url}
-                    alt={scene.name}
-                    loading="lazy"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                ) : (
-                  <div className={styles.cardFallback}><ImageOff size={32} color="var(--gray-300)" /></div>
-                )}
-                <div className={styles.cardOverlay}>
-                  <div className={styles.cardSceneName}>{scene.name}</div>
-                  <div className={styles.cardCharName}>
-                    {scene.character.name}
-                  </div>
-                </div>
+                {section.title}
+              </span>
+            </div>
+            <div
+              className={
+                isGrid ? styles.characterGrid : styles.scrollTrack
+              }
+            >
+              {displayItems.map((scene) => (
                 <div
-                  className={`${styles.genderBadge} ${scene.character.gender === "male" ? styles.genderBadgeMale : styles.genderBadgeFemale}`}
+                  key={`${section.key}-${scene.id}`}
+                  className={cardClass}
+                  onClick={() => {
+                    setSelectedScene(scene);
+                    setStartError(null);
+                    setExpandedPersonality(false);
+                    setExpandedBackground(false);
+                    setOpeningPreviewOpen(false);
+                  }}
                 >
-                  {scene.character.gender === "male" ? "ชาย" : "หญิง"}
-                </div>
-                {scene.character.personality_tags[0] ? (
-                  <div className={styles.tagBadge}>
-                    {tagMap?.get(scene.character.personality_tags[0]) ??
-                      scene.character.personality_tags[0]}
+                  <div
+                    className={styles.cardAccent}
+                    style={{ backgroundColor: section.color }}
+                  />
+                  {scene.image_url ? (
+                    <img
+                      className={styles.cardImage}
+                      src={scene.image_url}
+                      alt={scene.name}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className={styles.cardFallback}>
+                      <ImageOff size={28} color="var(--gray-300)" />
+                    </div>
+                  )}
+                  <div className={styles.cardOverlay}>
+                    <div className={styles.cardCharName}>
+                      {scene.character.name}
+                    </div>
+                    <div className={styles.cardSceneName}>
+                      {scene.name}
+                    </div>
                   </div>
-                ) : null}
+                  <div
+                    className={`${styles.genderBadge} ${
+                      scene.character.gender === "male"
+                        ? styles.genderBadgeMale
+                        : styles.genderBadgeFemale
+                    }`}
+                  >
+                    {scene.character.gender === "male" ? "ชาย" : "หญิง"}
+                  </div>
+                  {scene.character.personality_tags[0] && (
+                    <div
+                      className={styles.cardTagBadge}
+                      style={{
+                        backgroundColor:
+                          (TAG_TAGLINES[scene.character.personality_tags[0]]
+                            ?.color ?? "var(--lavender-500)") + "C0",
+                      }}
+                    >
+                      {tagMap?.get(scene.character.personality_tags[0]) ??
+                        scene.character.personality_tags[0]}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {hasMore && (
+              <div className={styles.loadMoreWrap}>
+                <button
+                  className={styles.loadMoreBtn}
+                  onClick={() => setLatestLimit((prev) => prev + 20)}
+                >
+                  ดูเพิ่มเติม
+                </button>
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       <div className={styles.pageBottom} />
 
