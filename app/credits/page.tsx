@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLiff } from "@/app/providers/liff-provider";
@@ -8,9 +9,11 @@ import {
   fetchCreditBalance,
   fetchCreditTransactions,
   createPayment,
+  fetchCheckInStatus,
   formatDate,
   type CreditBalance,
   type TransactionItem,
+  type CheckInStatusResponse,
 } from "@/app/lib/api";
 import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
@@ -18,7 +21,7 @@ import { ErrorState } from "../components/error-state";
 import { EmptyState } from "../components/empty-state";
 import { ToastBanner } from "../components/success-overlay";
 import { getTransactionIcon } from "@/app/lib/icons";
-import { Coffee, Sparkles, Gem, TrendingUp, MessageCircle, AlertTriangle, Receipt, Coins } from "lucide-react";
+import { Coffee, Sparkles, Gem, TrendingUp, MessageCircle, AlertTriangle, Receipt, Coins, Gift, CheckCircle, Flame } from "lucide-react";
 import styles from "./credits.module.css";
 
 // ── Constants (product config, not user data) ────────────
@@ -82,6 +85,7 @@ export default function CreditsPage() {
 
 function CreditsContent() {
   const { isReady, liff, liffError, isLoggedIn } = useLiff();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [balance, setBalance] = useState<CreditBalance | null>(null);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
@@ -89,19 +93,22 @@ function CreditsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [checkInStatus, setCheckInStatus] = useState<CheckInStatusResponse | null>(null);
 
   useEffect(() => {
     if (!isReady || !liff || liffError) return;
 
     const loadData = async () => {
       try {
-        const [balanceData, txData] = await Promise.all([
+        const [balanceData, txData, checkInData] = await Promise.all([
           fetchCreditBalance(),
           fetchCreditTransactions(PAGE_SIZE, 0),
+          fetchCheckInStatus().catch(() => null),
         ]);
         setBalance(balanceData);
         setTransactions(txData.transactions);
         setTotalTransactions(txData.total);
+        setCheckInStatus(checkInData);
 
         // Show toast if redirected from payment
         const success = searchParams.get("success");
@@ -187,6 +194,61 @@ function CreditsContent() {
       <PageHeader title="เครดิต" />
 
       <main className="px-5 pt-5 pb-12">
+        {/* ── Check-in Banner ────────────────── */}
+        {checkInStatus && (
+          <motion.div
+            onClick={() => router.push("/check-in")}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "12px 16px",
+              borderRadius: "var(--radius-lg)",
+              background: checkInStatus.checked_in_today
+                ? "var(--mint-50, #f0fdf4)"
+                : "linear-gradient(135deg, var(--coral-50) 0%, var(--lavender-50) 100%)",
+              border: checkInStatus.checked_in_today
+                ? "1px solid var(--mint-300, #86efac)"
+                : "1px solid var(--coral-200)",
+              marginBottom: 16,
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {checkInStatus.checked_in_today ? (
+                <CheckCircle size={20} style={{ color: "var(--mint-500)", flexShrink: 0 }} />
+              ) : (
+                <Gift size={20} style={{ color: "var(--coral-500)", flexShrink: 0 }} />
+              )}
+              <p
+                className="font-thai"
+                style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--gray-700)" }}
+              >
+                {checkInStatus.checked_in_today
+                  ? "เช็คอินแล้ววันนี้"
+                  : `เช็คอินวันนี้ +${checkInStatus.credits_to_earn} cr`}
+              </p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <Flame
+                size={14}
+                style={{
+                  color: checkInStatus.current_streak > 0 ? "var(--coral-500)" : "var(--gray-300)",
+                }}
+              />
+              <span
+                className="font-thai"
+                style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--gray-600)" }}
+              >
+                สตรีค {checkInStatus.current_streak} วัน
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* ── Credit Hero ────────────────────── */}
         <motion.section
           className={styles.heroCard}

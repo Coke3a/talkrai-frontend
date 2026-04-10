@@ -1,0 +1,234 @@
+/* ══════════════════════════════════════════
+   Check-in Page Styles
+   ══════════════════════════════════════════ */
+
+.content {
+  padding: 24px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Streak Counter ──────────────────────── */
+.streakCounter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 28px 24px 24px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(160deg, var(--soft-ivory) 0%, var(--blush) 100%);
+  border: 1px solid var(--coral-200);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.streakCounter::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 220px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(249, 109, 75, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+}
+
+.streakFireWrap {
+  position: relative;
+  z-index: 1;
+}
+
+.streakFireIcon {
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(249, 109, 75, 0.4));
+  animation: flicker 2.5s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); opacity: 1; }
+  33% { transform: scale(1.06) rotate(1deg); opacity: 0.95; }
+  66% { transform: scale(0.97) rotate(-1deg); opacity: 1; }
+}
+
+.streakNumber {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--coral-500);
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 2px;
+}
+
+.streakLabel {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── 7-Day Tracker ───────────────────────── */
+.trackerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-500);
+}
+
+.tracker {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.trackerDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 4px 8px;
+  border-radius: var(--radius-md);
+  background: var(--warm-white);
+  border: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.trackerDayNum {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--gray-400);
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.trackerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-300);
+}
+
+.trackerCredits {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--gray-400);
+}
+
+/* Completed state */
+.trackerDay.completed {
+  background: var(--coral-50);
+  border-color: var(--coral-200);
+}
+
+.trackerDay.completed .trackerIcon {
+  color: var(--coral-500);
+}
+
+.trackerDay.completed .trackerCredits {
+  color: var(--coral-500);
+}
+
+.trackerDay.completed .trackerDayNum {
+  color: var(--coral-500);
+}
+
+/* Today state */
+.trackerDay.today {
+  border-color: var(--coral-400);
+  box-shadow: 0 0 0 2px rgba(249, 109, 75, 0.15);
+}
+
+/* Bonus (streak milestone) state */
+.trackerDay.bonus {
+  background: linear-gradient(135deg, var(--coral-50) 0%, var(--lavender-50) 100%);
+  border-color: var(--lavender-300);
+}
+
+.trackerDay.bonus .trackerIcon {
+  color: var(--lavender-500);
+}
+
+.trackerDay.bonus .trackerCredits {
+  color: var(--lavender-500);
+}
+
+/* ── Reward Preview ──────────────────────── */
+.rewardPreview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--coral-50);
+  border: 1px solid var(--coral-200);
+}
+
+/* ── Success Banner ──────────────────────── */
+.successBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--mint-50, #f0fdf4);
+  border: 1px solid var(--mint-300, #86efac);
+}
+
+/* ── CTA Button ──────────────────────────── */
+.ctaButton {
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%);
+  box-shadow: 0 4px 20px rgba(249, 109, 75, 0.35);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (hover: hover) {
+  .ctaButton:not(:disabled):hover {
+    box-shadow: 0 6px 28px rgba(249, 109, 75, 0.45);
+    transform: translateY(-1px);
+  }
+}
+
+.ctaButton:disabled {
+  background: var(--gray-200);
+  color: var(--gray-500);
+  box-shadow: none;
+  cursor: default;
+}

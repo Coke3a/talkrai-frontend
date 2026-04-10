@@ -242,3 +242,36 @@ export function fetchPaymentStatus(
     `/api/payments/status?order_id=${orderId}`
   );
 }
+
+// ── Check-in ─────────────────────────────────────────────
+
+export interface StreakHistoryItem {
+  day: number;
+  completed: boolean;
+  credits: number;
+}
+
+export interface CheckInStatusResponse {
+  checked_in_today: boolean;
+  current_streak: number;
+  streak_day: number;
+  credits_to_earn: number;
+  streak_history: StreakHistoryItem[];
+}
+
+export interface CheckInResponse {
+  credits_earned: number;
+  streak_day: number;
+  current_streak: number;
+  new_balance: number;
+}
+
+export function fetchCheckInStatus(): Promise<CheckInStatusResponse> {
+  return apiFetch<CheckInStatusResponse>("/api/check-in/status");
+}
+
+export function performCheckIn(): Promise<CheckInResponse> {
+  return apiFetch<CheckInResponse>("/api/check-in", {
+    method: "POST",
+  });
+}
