@@ -87,7 +87,7 @@ const RELATIONSHIP_MAP: Record<string, { label: string }> = {
 const SUMMARY_COLLAPSE_THRESHOLD = 80;
 
 export default function StatusPage() {
-  const { isReady, liff, liffError, isInClient, isLoggedIn } = useLiff();
+  const { isReady, liff, liffError, isInClient, isLoggedIn, login } = useLiff();
 
   const enabled = isReady && isLoggedIn && !!liff && !liffError;
   const { data: sessionData, error: sessionError, mutate: mutateSession } = useCurrentSession(enabled);
@@ -159,17 +159,15 @@ export default function StatusPage() {
             <p className="font-thai text-base" style={{ color: "var(--gray-500)", marginBottom: 16 }}>
               กรุณาเข้าสู่ระบบเพื่อดูสถานะเรื่องราว
             </p>
-            {liff && (
-              <button
-                onClick={() => liff.login()}
-                className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
-                style={{
-                  background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
-                }}
-              >
-                เข้าสู่ระบบด้วย LINE
-              </button>
-            )}
+            <button
+              onClick={login}
+              className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+              style={{
+                background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
+              }}
+            >
+              เข้าสู่ระบบด้วย LINE
+            </button>
           </div>
         </div>
       </div>

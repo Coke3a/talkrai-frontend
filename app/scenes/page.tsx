@@ -112,7 +112,7 @@ function buildTagMap(tags: TagsData | null): Map<string, string> | null {
 // ── Page Component ──────────────────────────────────────
 
 export default function ScenesPage() {
-  const { liff, isReady, isLoggedIn, isInClient } = useLiff();
+  const { liff, isReady, isLoggedIn, isInClient, login } = useLiff();
 
   const enabled = isReady && isLoggedIn;
   const { data: scenes = [], error: scenesError } = useScenes(enabled);
@@ -329,17 +329,15 @@ export default function ScenesPage() {
             <p className="font-thai text-base" style={{ color: "var(--gray-500)", marginBottom: 16 }}>
               กรุณาเข้าสู่ระบบเพื่อดูฉากทั้งหมด
             </p>
-            {liff && (
-              <button
-                onClick={() => liff.login()}
-                className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
-                style={{
-                  background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
-                }}
-              >
-                เข้าสู่ระบบด้วย LINE
-              </button>
-            )}
+            <button
+              onClick={login}
+              className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+              style={{
+                background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
+              }}
+            >
+              เข้าสู่ระบบด้วย LINE
+            </button>
           </div>
         </div>
       </div>

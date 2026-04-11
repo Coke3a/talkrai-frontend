@@ -3,6 +3,7 @@
 import type { Liff } from "@line/liff";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -16,6 +17,7 @@ type LiffContextType = {
   isLoggedIn: boolean;
   isInClient: boolean;
   isReady: boolean;
+  login: () => void;
 };
 
 const LiffContext = createContext<LiffContextType>({
@@ -24,6 +26,7 @@ const LiffContext = createContext<LiffContextType>({
   isLoggedIn: false,
   isInClient: false,
   isReady: false,
+  login: () => {},
 });
 
 export function LiffProvider({ children }: { children: ReactNode }) {
@@ -41,23 +44,30 @@ export function LiffProvider({ children }: { children: ReactNode }) {
     import("@line/liff").then((mod) => {
       const liff = mod.default;
       liff
-        .init({
-          liffId,
-          withLoginOnExternalBrowser: true,
-        })
+        .init({ liffId })
         .then(() => {
           setLiffObject(liff);
-          setIsLoggedIn(liff.isLoggedIn());
-          setIsInClient(liff.isInClient?.() ?? false);
+          const inClient = liff.isInClient?.() ?? false;
+          setIsInClient(inClient);
+
+          if (liff.isLoggedIn()) {
+            setIsLoggedIn(true);
+          } else if (!inClient) {
+            liff.login({ redirectUri: window.location.href });
+            return;
+          }
+          setIsReady(true);
         })
         .catch((error: Error) => {
           setLiffError(error.message);
-        })
-        .finally(() => {
           setIsReady(true);
         });
     });
   }, [liffId]);
+
+  const login = useCallback(() => {
+    liffObject?.login({ redirectUri: window.location.href });
+  }, [liffObject]);
 
   const value = useMemo(
     () => ({
@@ -66,8 +76,9 @@ export function LiffProvider({ children }: { children: ReactNode }) {
       isLoggedIn,
       isInClient,
       isReady: liffId ? isReady : true,
+      login,
     }),
-    [liffObject, liffError, liffId, isLoggedIn, isInClient, isReady]
+    [liffObject, liffError, liffId, isLoggedIn, isInClient, isReady, login]
   );
 
   return (

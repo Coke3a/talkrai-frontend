@@ -16,7 +16,7 @@ const floatingIcons = [
 ];
 
 export default function Home() {
-  const { liff, liffError, isLoggedIn, isInClient, isReady } = useLiff();
+  const { liff, liffError, isLoggedIn, isInClient, isReady, login } = useLiff();
 
   if (!isReady) {
     return <LoadingState title="TalkRai" />;
@@ -137,9 +137,9 @@ export default function Home() {
         </motion.section>
 
         {/* Login Button */}
-        {!isLoggedIn && !isInClient && liff && (
+        {!isLoggedIn && !isInClient && (
           <motion.button
-            onClick={() => liff.login()}
+            onClick={login}
             className="font-thai w-full rounded-[var(--radius-md)] py-4 text-base font-bold text-white transition-all active:scale-[0.98]"
             style={{
               background:
