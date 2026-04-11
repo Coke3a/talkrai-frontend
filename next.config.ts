@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "api.dicebear.com" },
       { protocol: "https", hostname: "*.talkrai.app" },
+      { protocol: "https", hostname: "ffzaplhizzoljnfkdqdd.supabase.co" },
     ],
   },
 };

@@ -1,8 +1,18 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://api.talkrai.app";
 
+let liffModule: typeof import("@line/liff").default | null = null;
+
+async function getLiff() {
+  if (!liffModule) {
+    const mod = await import("@line/liff");
+    liffModule = mod.default;
+  }
+  return liffModule;
+}
+
 async function getAuthHeaders(): Promise<HeadersInit> {
-  const { default: liff } = await import("@line/liff");
+  const liff = await getLiff();
   const accessToken = liff.getAccessToken();
   if (!accessToken) {
     throw new Error("Not logged in");
@@ -29,7 +39,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
       !sessionStorage.getItem(LIFF_AUTH_RETRY_KEY)
     ) {
       sessionStorage.setItem(LIFF_AUTH_RETRY_KEY, "1");
-      const { default: liff } = await import("@line/liff");
+      const liff = await getLiff();
       liff.logout(); // Clear cached expired token
       liff.login({ redirectUri: window.location.href });
       throw new Error("Token expired — re-authenticating");

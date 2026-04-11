@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLiff } from "@/app/providers/liff-provider";
-import { fetchProfile, type ProfileStats } from "@/app/lib/api";
+import { useProfile } from "@/app/lib/hooks";
 import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
 import { ErrorState } from "../components/error-state";
@@ -26,37 +27,23 @@ function formatMemberSince(dateStr: string): string {
 export default function ProfilePage() {
   const { isReady, liffError, liff, isLoggedIn } = useLiff();
   const [lineProfile, setLineProfile] = useState<LineProfile | null>(null);
-  const [stats, setStats] = useState<ProfileStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const enabled = isReady && isLoggedIn && !!liff && !liffError;
+  const { data: stats, error: statsError } = useProfile(enabled);
+
+  const loading = enabled && !stats && !statsError;
+  const error = statsError?.message || null;
 
   useEffect(() => {
-    if (!isReady || !liff || liffError || !isLoggedIn) {
-      if (isReady) setLoading(false);
-      return;
-    }
+    if (!enabled || !liff) return;
 
-    const loadData = async () => {
-      try {
-        const [profile, profileStats] = await Promise.all([
-          liff.getProfile(),
-          fetchProfile(),
-        ]);
-
-        setLineProfile({
-          displayName: profile.displayName,
-          pictureUrl: profile.pictureUrl,
-        });
-        setStats(profileStats);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [isReady, liff, liffError, isLoggedIn]);
+    liff.getProfile().then((profile) => {
+      setLineProfile({
+        displayName: profile.displayName,
+        pictureUrl: profile.pictureUrl,
+      });
+    });
+  }, [enabled, liff]);
 
   if (!isReady || loading) {
     return <LoadingState title="โปรไฟล์" />;
@@ -135,12 +122,13 @@ export default function ProfilePage() {
               <div className={styles.avatarSparkle} style={{ bottom: 8, left: -6, animationDelay: '1s' }}>
                 <Sparkles size={10} color="rgba(255,255,255,0.5)" />
               </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={pictureUrl}
                 alt={displayName}
                 className={styles.avatar}
-                onError={(e) => { e.currentTarget.src = `https://api.dicebear.com/9.x/adventurer/svg?seed=${displayName}`; }}
+                width={120}
+                height={120}
+                unoptimized
               />
             </div>
 

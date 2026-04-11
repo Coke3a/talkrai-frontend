@@ -1,15 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useLiff } from "../providers/liff-provider";
 import {
-  fetchScenes,
-  fetchTags,
-  fetchCurrentSession,
   startSession,
   type SceneItem,
   type TagsData,
 } from "@/app/lib/api";
+import { useScenes, useTags, useCurrentSession } from "@/app/lib/hooks";
+import Image from "next/image";
 import { PageHeader } from "../components/page-header";
 import { ErrorState } from "../components/error-state";
 import { SuccessOverlay } from "../components/success-overlay";
@@ -115,14 +114,27 @@ function buildTagMap(tags: TagsData | null): Map<string, string> | null {
 export default function ScenesPage() {
   const { liff, isReady, isLoggedIn, isInClient } = useLiff();
 
-  const [scenes, setScenes] = useState<SceneItem[]>([]);
-  const [tags, setTags] = useState<TagsData | null>(null);
-  const [currentSession, setCurrentSession] =
-    useState<CurrentSessionSummary | null>(null);
+  const enabled = isReady && isLoggedIn;
+  const { data: scenes = [], error: scenesError } = useScenes(enabled);
+  const { data: tags, error: tagsError } = useTags(enabled);
+  const { data: sessionData, error: sessionError } = useCurrentSession(enabled);
+
+  const loading = enabled && !scenes.length && !scenesError;
+  const error = scenesError?.message || tagsError?.message || sessionError?.message || null;
+
+  const currentSession = useMemo<CurrentSessionSummary | null>(() => {
+    const s = sessionData?.session;
+    if (!s) return null;
+    return {
+      id: s.id,
+      character_name: s.character_name,
+      character_avatar_url: s.character_avatar_url,
+      scene_name: s.scene_name,
+    };
+  }, [sessionData]);
+
   const [genderFilter, setGenderFilter] = useState<GenderFilter>("all");
   const [selectedScene, setSelectedScene] = useState<SceneItem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Session start flow states
   const [showConfirmChange, setShowConfirmChange] = useState(false);
@@ -138,45 +150,9 @@ export default function ScenesPage() {
   const [expandedBackground, setExpandedBackground] = useState(false);
   const [openingPreviewOpen, setOpeningPreviewOpen] = useState(false);
 
-  // ── Data Fetching ────────────────────────────────────
-
-  useEffect(() => {
-    if (!isReady || !isLoggedIn) {
-      if (isReady) setLoading(false);
-      return;
-    }
-
-    async function loadData() {
-      try {
-        const [scenesData, tagsData, sessionData] = await Promise.all([
-          fetchScenes(),
-          fetchTags(),
-          fetchCurrentSession().then((r) => r.session),
-        ]);
-
-        setScenes(scenesData);
-        setTags(tagsData);
-        if (sessionData) {
-          setCurrentSession({
-            id: sessionData.id,
-            character_name: sessionData.character_name,
-            character_avatar_url: sessionData.character_avatar_url,
-            scene_name: sessionData.scene_name,
-          });
-        }
-      } catch {
-        setError("ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, [isReady, isLoggedIn]);
-
   // ── Tag Map (O(1) lookups) ──────────────────────────
 
-  const tagMap = useMemo(() => buildTagMap(tags), [tags]);
+  const tagMap = useMemo(() => buildTagMap(tags ?? null), [tags]);
 
   // ── Filtered Categories ──────────────────────────────
 
@@ -420,11 +396,12 @@ export default function ScenesPage() {
             }}
           >
             {currentSession.character_avatar_url ? (
-              <img
+              <Image
                 className={styles.sessionAvatar}
                 src={currentSession.character_avatar_url}
                 alt={currentSession.character_name}
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                width={44}
+                height={44}
               />
             ) : null}
             <div className={styles.sessionInfo}>
@@ -489,14 +466,12 @@ export default function ScenesPage() {
                     style={{ backgroundColor: section.color }}
                   />
                   {scene.image_url ? (
-                    <img
+                    <Image
                       className={styles.cardImage}
                       src={scene.image_url}
                       alt={scene.name}
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
+                      fill
+                      sizes="135px"
                     />
                   ) : (
                     <div className={styles.cardFallback}>
@@ -580,19 +555,21 @@ export default function ScenesPage() {
             {/* Hero with avatar overlay */}
             <div className={styles.sheetHero}>
               {selectedScene.image_url ? (
-                <img
+                <Image
                   className={styles.sheetImage}
                   src={selectedScene.image_url}
                   alt={selectedScene.name}
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  width={540}
+                  height={304}
                 />
               ) : null}
               {selectedScene.character.avatar_url ? (
-                <img
+                <Image
                   className={styles.sheetAvatarOverlay}
                   src={selectedScene.character.avatar_url}
                   alt={selectedScene.character.name}
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  width={52}
+                  height={52}
                 />
               ) : null}
             </div>

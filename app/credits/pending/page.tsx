@@ -13,8 +13,9 @@ import { LoadingState } from "../../components/loading-state";
 import { Coins, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import styles from "./pending.module.css";
 
-const POLL_INTERVAL = 3000;
-const MAX_POLLS = 60; // 3 minutes max
+const INITIAL_POLL_INTERVAL = 3000;
+const MAX_POLL_INTERVAL = 15000;
+const MAX_POLL_DURATION = 180000; // 3 minutes max
 
 export default function PendingPaymentPage() {
   return (
@@ -33,40 +34,42 @@ function PendingContent() {
 
   const [status, setStatus] = useState<PaymentStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const pollCountRef = useRef(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!isReady || !liff || liffError || !orderId) return;
 
+    let cancelled = false;
+    const startTime = Date.now();
+    let interval = INITIAL_POLL_INTERVAL;
+
     const poll = async () => {
       try {
         const result = await fetchPaymentStatus(orderId);
+        if (cancelled) return;
         setStatus(result);
 
-        if (result.status !== "pending") {
-          if (intervalRef.current) clearInterval(intervalRef.current);
+        if (result.status !== "pending") return;
+
+        if (Date.now() - startTime >= MAX_POLL_DURATION) {
+          setError("หมดเวลาตรวจสอบ กรุณาตรวจสอบอีกครั้ง");
           return;
         }
 
-        pollCountRef.current += 1;
-        if (pollCountRef.current >= MAX_POLLS) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          setError("หมดเวลาตรวจสอบ กรุณาตรวจสอบอีกครั้ง");
-        }
+        // Exponential backoff: 3s → 4.5s → 6.75s → ... capped at 15s
+        interval = Math.min(interval * 1.5, MAX_POLL_INTERVAL);
+        timeoutRef.current = setTimeout(poll, interval);
       } catch (err) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
+        if (cancelled) return;
         setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       }
     };
 
-    // Initial poll
     poll();
-    // Then poll at interval
-    intervalRef.current = setInterval(poll, POLL_INTERVAL);
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      cancelled = true;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [isReady, liff, liffError, orderId]);
 

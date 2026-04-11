@@ -1,17 +1,16 @@
 "use client";
 
-import { Suspense, useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback, memo } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLiff } from "@/app/providers/liff-provider";
 import {
-  fetchCreditBalance,
   fetchCreditTransactions,
   createPayment,
   formatDate,
-  type CreditBalance,
   type TransactionItem,
 } from "@/app/lib/api";
+import { useCreditBalance } from "@/app/lib/hooks";
 import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
 import { ErrorState } from "../components/error-state";
@@ -83,23 +82,24 @@ export default function CreditsPage() {
 function CreditsContent() {
   const { isReady, liff, liffError, isLoggedIn } = useLiff();
   const searchParams = useSearchParams();
-  const [balance, setBalance] = useState<CreditBalance | null>(null);
+
+  const enabled = isReady && !!liff && !liffError;
+  const { data: balance, error: balanceError, mutate: mutateBalance } = useCreditBalance(enabled);
+
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [totalTransactions, setTotalTransactions] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [txLoading, setTxLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  useEffect(() => {
-    if (!isReady || !liff || liffError) return;
+  const loading = enabled && !balance && !balanceError;
 
-    const loadData = async () => {
+  useEffect(() => {
+    if (!enabled) return;
+
+    const loadTransactions = async () => {
       try {
-        const [balanceData, txData] = await Promise.all([
-          fetchCreditBalance(),
-          fetchCreditTransactions(PAGE_SIZE, 0),
-        ]);
-        setBalance(balanceData);
+        const txData = await fetchCreditTransactions(PAGE_SIZE, 0);
         setTransactions(txData.transactions);
         setTotalTransactions(txData.total);
 
@@ -109,6 +109,7 @@ function CreditsContent() {
         const failed = searchParams.get("failed");
         if (success === "true" && credits) {
           setToast({ type: "success", message: `เติมเครดิตสำเร็จ! ได้รับ +${credits} เครดิต` });
+          mutateBalance();
           window.history.replaceState(null, "", "/credits");
         } else if (failed === "true") {
           setToast({ type: "error", message: "การชำระเงินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" });
@@ -117,12 +118,12 @@ function CreditsContent() {
       } catch (err) {
         setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       } finally {
-        setLoading(false);
+        setTxLoading(false);
       }
     };
 
-    loadData();
-  }, [isReady, liff, liffError, searchParams]);
+    loadTransactions();
+  }, [enabled, searchParams, mutateBalance]);
 
   const loadMore = useCallback(async () => {
     try {
@@ -136,15 +137,15 @@ function CreditsContent() {
     }
   }, [transactions.length]);
 
-  if (!isReady || loading) {
+  if (!isReady || loading || txLoading) {
     return <LoadingState title="เครดิต" />;
   }
 
-  if (liffError || error) {
+  if (liffError || balanceError || error) {
     return (
       <ErrorState
         headerTitle="เครดิต"
-        message={(liffError || error)!}
+        message={(liffError || balanceError?.message || error)!}
         onRetry={() => window.location.reload()}
       />
     );
@@ -313,7 +314,7 @@ function CreditsContent() {
 }
 
 // ── Package Card ───────────────────────────────────────────
-function PackageCard({
+const PackageCard = memo(function PackageCard({
   pkg,
   onError,
 }: {
@@ -424,10 +425,10 @@ function PackageCard({
       </button>
     </div>
   );
-}
+});
 
 // ── Transaction Row ────────────────────────────────────────
-function TransactionRow({ tx }: { tx: TransactionItem }) {
+const TransactionRow = memo(function TransactionRow({ tx }: { tx: TransactionItem }) {
   const positive = isPositive(tx.type);
   const label = getTransactionLabel(tx.type);
   const sign = positive ? "+" : "";
@@ -463,4 +464,4 @@ function TransactionRow({ tx }: { tx: TransactionItem }) {
       </div>
     </div>
   );
-}
+});

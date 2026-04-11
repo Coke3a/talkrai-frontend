@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Quicksand, Plus_Jakarta_Sans, IBM_Plex_Sans_Thai } from "next/font/google";
 import { LiffProvider } from "./providers/liff-provider";
+import { ErrorBoundary } from "./components/error-boundary";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -56,7 +57,9 @@ export default function RootLayout({
       <body
         className={`${quicksand.variable} ${plusJakartaSans.variable} ${ibmPlexSansThai.variable} antialiased`}
       >
-        <LiffProvider>{children}</LiffProvider>
+        <LiffProvider>
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </LiffProvider>
       </body>
     </html>
   );

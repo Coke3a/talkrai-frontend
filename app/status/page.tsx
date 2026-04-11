@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLiff } from "@/app/providers/liff-provider";
 import {
-  fetchCurrentSession,
   endSession,
   formatDateShort,
-  type CurrentSessionData,
 } from "@/app/lib/api";
+import { useCurrentSession } from "@/app/lib/hooks";
+import Image from "next/image";
 import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
 import { ErrorState } from "../components/error-state";
@@ -88,33 +88,19 @@ const SUMMARY_COLLAPSE_THRESHOLD = 80;
 
 export default function StatusPage() {
   const { isReady, liff, liffError, isInClient, isLoggedIn } = useLiff();
-  const [session, setSession] = useState<CurrentSessionData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const enabled = isReady && isLoggedIn && !!liff && !liffError;
+  const { data: sessionData, error: sessionError, mutate: mutateSession } = useCurrentSession(enabled);
+
+  const session = sessionData?.session ?? null;
+  const loading = enabled && !sessionData && !sessionError;
+  const [actionError, setActionError] = useState<string | null>(null);
+  const error = sessionError?.message || actionError || null;
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [ending, setEnding] = useState(false);
-
-  useEffect(() => {
-    if (!isReady || !liff || liffError || !isLoggedIn) {
-      if (isReady) setLoading(false);
-      return;
-    }
-
-    const loadData = async () => {
-      try {
-        const data = await fetchCurrentSession();
-        setSession(data.session);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [isReady, liff, liffError, isLoggedIn]);
 
   const handleEndStory = useCallback(() => {
     setShowConfirm(true);
@@ -129,14 +115,14 @@ export default function StatusPage() {
         liff.closeWindow();
       } else {
         setShowSuccess(true);
-        setSession(null);
+        mutateSession({ session: null }, false);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
+      setActionError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
     } finally {
       setEnding(false);
     }
-  }, [isInClient, liff]);
+  }, [isInClient, liff, mutateSession]);
 
   const handleCancelConfirm = useCallback(() => {
     setShowConfirm(false);
@@ -228,12 +214,13 @@ export default function StatusPage() {
         {/* Character Hero */}
         <section className={styles.heroSection}>
           <div className={styles.heroImageWrapper}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={imageUrl}
               alt={session.character_name}
               className={styles.heroImage}
-              onError={(e) => { e.currentTarget.src = `https://api.dicebear.com/9.x/adventurer/svg?seed=${session.scene_name}&backgroundColor=b6e3f4&scale=110`; }}
+              fill
+              sizes="540px"
+              unoptimized={imageUrl.includes("dicebear")}
             />
             <div className={styles.heroGradient} />
           </div>
