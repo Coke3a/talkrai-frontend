@@ -573,28 +573,68 @@
   margin-bottom: 8px;
 }
 
-/* Preview box */
-.previewBox {
-  background: var(--soft-ivory);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
-  border-left: 3px solid var(--lavender-300);
+/* Opening preview — two-section layout */
+.previewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.previewNarrator {
+.previewNarratorSection {
+  background: var(--lavender-50);
+  border-left: 3px solid var(--lavender-300);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.previewDialogueSection {
+  background: var(--coral-50);
+  border-left: 3px solid var(--coral-300);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.previewSectionLabel {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 6px;
+}
+
+.previewNarratorText {
   font-family: var(--font-thai);
   font-style: italic;
   font-size: 0.82rem;
   color: var(--gray-600);
-  line-height: 1.7;
-  margin-bottom: 8px;
+  line-height: 1.75;
+  margin: 0;
 }
 
-.previewDialogue {
-  font-size: 0.85rem;
+.previewDialogueBlocks {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.previewActionRow {
+  font-style: italic;
+  font-size: 0.80rem;
+  color: var(--gray-500);
+  line-height: 1.65;
+  padding: 5px 10px;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--gray-300);
+}
+
+.previewSpeechRow {
+  font-size: 0.84rem;
   color: var(--gray-800);
-  font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.65;
+  padding: 5px 10px;
 }
 
 /* Tags in sheet */
@@ -620,6 +660,30 @@
   border-radius: var(--radius-full);
   background: var(--lavender-100);
   color: var(--lavender-600);
+}
+
+/* Atmosphere mood + tag chips (scene context card) */
+.atmosphereTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.atmosphereMoodTag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+}
+
+.atmosphereTag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  color: var(--gray-600);
 }
 
 /* Scene info grid */

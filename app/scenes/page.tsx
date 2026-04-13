@@ -27,6 +27,39 @@ interface CurrentSessionSummary {
 
 type GenderFilter = "all" | "male" | "female";
 
+// ── Dialogue block parser ──────────────────────────────────
+
+type DialogueBlock = { type: "narration" | "dialogue"; text: string };
+
+function parseDialogueBlocks(text: string): DialogueBlock[] {
+  const blocks: DialogueBlock[] = [];
+  let buffer = "";
+  let inNarration = false;
+  let inQuote = false;
+
+  for (const ch of text) {
+    if (ch === "*" && !inQuote) {
+      const trimmed = buffer.trim();
+      if (trimmed)
+        blocks.push({ type: inNarration ? "narration" : "dialogue", text: trimmed });
+      buffer = "";
+      inNarration = !inNarration;
+    } else if (ch === '"' && !inNarration) {
+      inQuote = !inQuote;
+      buffer += ch;
+    } else {
+      buffer += ch;
+    }
+  }
+
+  const remaining = buffer.trim();
+  if (remaining)
+    blocks.push({ type: inNarration ? "narration" : "dialogue", text: remaining });
+  if (blocks.length === 0 && text.trim())
+    blocks.push({ type: "dialogue", text: text.trim() });
+  return blocks;
+}
+
 // ── Tag Taglines & Colors ──────────────────────────────────
 
 const TAG_TAGLINES: Record<string, { tagline: string; color: string }> = {
@@ -47,6 +80,41 @@ const TAG_TAGLINES: Record<string, { tagline: string; color: string }> = {
   wild: { tagline: "อันตราย แต่เสน่ห์แรง", color: "#F96D4B" },
   intellectual: { tagline: "ฉลาดจนน่าหลงใหล", color: "#6BA3F0" },
 };
+
+// ── Atmosphere Mood Labels ─────────────────────────────────
+
+const ATMOSPHERE_MOOD_LABELS: Record<
+  string,
+  { label: string; bg: string; color: string }
+> = {
+  romantic:    { label: "โรแมนติก",  bg: "#FFE4EC", color: "#B5184D" },
+  cozy:        { label: "อบอุ่นใจ",   bg: "#FFF3E0", color: "#A05C00" },
+  tense:       { label: "ตึงเครียด",  bg: "#EEF2FF", color: "#3949AB" },
+  mysterious:  { label: "ลึกลับ",     bg: "#F3E5F5", color: "#6A1B9A" },
+  playful:     { label: "สนุกสนาน",  bg: "#E8F5E9", color: "#2E7D32" },
+  melancholic: { label: "เศร้าหมอง", bg: "#E3F2FD", color: "#1565C0" },
+  exciting:    { label: "ตื่นเต้น",   bg: "#FFF3E0", color: "#E65100" },
+};
+
+function parseAtmosphereSummary(summary: string): {
+  mood: string | null;
+  tags: string[];
+} {
+  const dashIdx = summary.indexOf(" \u2014 ");
+  if (dashIdx !== -1) {
+    const mood = summary.slice(0, dashIdx).trim();
+    const tags = summary
+      .slice(dashIdx + 3)
+      .split(", ")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    return { mood, tags };
+  }
+  if (summary.trim() in ATMOSPHERE_MOOD_LABELS) {
+    return { mood: summary.trim(), tags: [] };
+  }
+  return { mood: null, tags: summary ? [summary] : [] };
+}
 
 const WELCOME_MESSAGES: { text: string; sub: string }[] = [
   {
@@ -668,9 +736,36 @@ export default function ScenesPage() {
                 </div>
                 <div className={styles.sceneContextMeta}>
                   <span>{selectedScene.location}</span>
-                  <span className={styles.sceneContextDot}>&middot;</span>
-                  <span>{selectedScene.atmosphere_summary}</span>
                 </div>
+                {(() => {
+                  const { mood, tags } = parseAtmosphereSummary(
+                    selectedScene.atmosphere_summary
+                  );
+                  const moodDef = mood
+                    ? ATMOSPHERE_MOOD_LABELS[mood]
+                    : undefined;
+                  if (!moodDef && tags.length === 0) return null;
+                  return (
+                    <div className={styles.atmosphereTags}>
+                      {moodDef && (
+                        <span
+                          className={styles.atmosphereMoodTag}
+                          style={{
+                            background: moodDef.bg,
+                            color: moodDef.color,
+                          }}
+                        >
+                          {moodDef.label}
+                        </span>
+                      )}
+                      {tags.map((tag) => (
+                        <span key={tag} className={styles.atmosphereTag}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Opening Preview (collapsible) */}
@@ -699,12 +794,32 @@ export default function ScenesPage() {
                   </svg>
                 </button>
                 {openingPreviewOpen && (
-                  <div className={styles.previewBox}>
-                    <div className={styles.previewNarrator}>
-                      {selectedScene.opening_narrator}
+                  <div className={styles.previewContainer}>
+                    {/* Section 1: Narrator (บรรยาย) */}
+                    <div className={styles.previewNarratorSection}>
+                      <span className={styles.previewSectionLabel}>บรรยาย</span>
+                      <p className={styles.previewNarratorText}>
+                        {selectedScene.opening_narrator}
+                      </p>
                     </div>
-                    <div className={styles.previewDialogue}>
-                      &ldquo;{selectedScene.opening_dialogue}&rdquo;
+
+                    {/* Section 2: Dialogue blocks (บทเปิด) */}
+                    <div className={styles.previewDialogueSection}>
+                      <span className={styles.previewSectionLabel}>บทเปิด</span>
+                      <div className={styles.previewDialogueBlocks}>
+                        {parseDialogueBlocks(selectedScene.opening_dialogue).map(
+                          (block, i) =>
+                            block.type === "narration" ? (
+                              <div key={i} className={styles.previewActionRow}>
+                                {block.text}
+                              </div>
+                            ) : (
+                              <div key={i} className={styles.previewSpeechRow}>
+                                {block.text}
+                              </div>
+                            )
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
