@@ -5,12 +5,14 @@ import { useLiff } from "@/app/providers/liff-provider";
 import {
   endSession,
   formatDateShort,
+  isUserInactiveError,
 } from "@/app/lib/api";
 import { useCurrentSession } from "@/app/lib/hooks";
 import Image from "next/image";
 import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
 import { ErrorState } from "../components/error-state";
+import { InactiveUserState } from "../components/inactive-user-state";
 import { EmptyState } from "../components/empty-state";
 import { SuccessOverlay } from "../components/success-overlay";
 import { getMoodIcon, getRelationshipIcon } from "@/app/lib/icons";
@@ -138,6 +140,10 @@ export default function StatusPage() {
 
   if (!isReady || loading) {
     return <LoadingState title="สถานะเรื่องราว" />;
+  }
+
+  if (isUserInactiveError(sessionError)) {
+    return <InactiveUserState headerTitle="สถานะเรื่องราว" />;
   }
 
   if (liffError || error) {

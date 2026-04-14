@@ -1,6 +1,19 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://api.talkrai.app";
 
+export class ApiError extends Error {
+  code: string;
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.code = code;
+  }
+}
+
+export function isUserInactiveError(error: unknown): boolean {
+  return error instanceof ApiError && error.code === "USER_INACTIVE";
+}
+
 let liffModule: typeof import("@line/liff").default | null = null;
 
 async function getLiff() {
@@ -52,7 +65,10 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new Error(body?.message || `API error: ${res.status}`);
+    throw new ApiError(
+      body?.error || "UNKNOWN_ERROR",
+      body?.message || `API error: ${res.status}`
+    );
   }
 
   // Success — clear retry flag

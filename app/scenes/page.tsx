@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useLiff } from "../providers/liff-provider";
 import {
   startSession,
+  isUserInactiveError,
   type SceneItem,
   type TagsData,
 } from "@/app/lib/api";
@@ -11,6 +12,7 @@ import { useScenes, useTags, useCurrentSession } from "@/app/lib/hooks";
 import Image from "next/image";
 import { PageHeader } from "../components/page-header";
 import { ErrorState } from "../components/error-state";
+import { InactiveUserState } from "../components/inactive-user-state";
 import { SuccessOverlay } from "../components/success-overlay";
 import { ImageOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -375,6 +377,10 @@ export default function ScenesPage() {
   }
 
   // ── Error State ──────────────────────────────────────
+
+  if ([scenesError, tagsError, sessionError].some(isUserInactiveError)) {
+    return <InactiveUserState headerTitle="เลือกฉาก" />;
+  }
 
   if (error) {
     return (

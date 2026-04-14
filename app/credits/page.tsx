@@ -8,12 +8,14 @@ import {
   fetchCreditTransactions,
   createPayment,
   formatDate,
+  isUserInactiveError,
   type TransactionItem,
 } from "@/app/lib/api";
 import { useCreditBalance } from "@/app/lib/hooks";
 import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
 import { ErrorState } from "../components/error-state";
+import { InactiveUserState } from "../components/inactive-user-state";
 import { EmptyState } from "../components/empty-state";
 import { ToastBanner } from "../components/success-overlay";
 import { getTransactionIcon } from "@/app/lib/icons";
@@ -139,6 +141,10 @@ function CreditsContent() {
 
   if (!isReady || loading || txLoading) {
     return <LoadingState title="เครดิต" />;
+  }
+
+  if (isUserInactiveError(balanceError)) {
+    return <InactiveUserState headerTitle="เครดิต" />;
   }
 
   if (liffError || balanceError || error) {

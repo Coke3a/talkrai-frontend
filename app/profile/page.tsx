@@ -5,9 +5,11 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLiff } from "@/app/providers/liff-provider";
 import { useProfile } from "@/app/lib/hooks";
+import { isUserInactiveError } from "@/app/lib/api";
 import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
 import { ErrorState } from "../components/error-state";
+import { InactiveUserState } from "../components/inactive-user-state";
 import { BookOpen, MessageSquare, Sparkles } from "lucide-react";
 import styles from "./profile.module.css";
 
@@ -47,6 +49,10 @@ export default function ProfilePage() {
 
   if (!isReady || loading) {
     return <LoadingState title="โปรไฟล์" />;
+  }
+
+  if (isUserInactiveError(statsError)) {
+    return <InactiveUserState headerTitle="โปรไฟล์" />;
   }
 
   if (liffError || error) {
