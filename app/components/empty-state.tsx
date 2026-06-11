@@ -60,7 +60,7 @@ export function EmptyState({
             borderRadius: "var(--radius-full)",
             border: "none",
             background: "linear-gradient(135deg, var(--coral-500), var(--coral-600))",
-            color: "white",
+            color: "var(--color-ink-950)",
             fontSize: 14,
             fontWeight: 600,
             cursor: "pointer",

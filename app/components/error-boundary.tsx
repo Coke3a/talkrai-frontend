@@ -78,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
               border: "none",
               background:
                 "linear-gradient(135deg, var(--coral-500, #F96D4B) 0%, var(--coral-600, #E05A39) 100%)",
-              color: "white",
+              color: "var(--color-ink-950)",
               fontSize: 14,
               fontWeight: 700,
               cursor: "pointer",

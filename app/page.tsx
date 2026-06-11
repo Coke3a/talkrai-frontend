@@ -39,10 +39,11 @@ export default function Home() {
       <main className="px-5 pt-5 pb-12">
         {/* Hero Section */}
         <motion.section
-          className="relative mb-8 overflow-hidden rounded-[var(--radius-xl)] px-6 py-12 text-center text-white"
+          className="relative mb-8 overflow-hidden rounded-[var(--radius-xl)] px-6 py-12 text-center"
           style={{
             background:
               "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 25%, var(--lavender-500) 100%)",
+            color: "var(--color-ink-950)",
           }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -51,11 +52,11 @@ export default function Home() {
           {/* Decorative circles */}
           <div
             className="pointer-events-none absolute top-[-80px] right-[-60px] h-[200px] w-[200px] rounded-full"
-            style={{ background: "rgba(255,255,255,0.15)" }}
+            style={{ background: "rgba(0,0,0,0.12)" }}
           />
           <div
             className="pointer-events-none absolute bottom-[-40px] left-[-50px] h-[150px] w-[150px] rounded-full"
-            style={{ background: "rgba(255,255,255,0.1)" }}
+            style={{ background: "rgba(0,0,0,0.08)" }}
           />
 
           {/* Floating decorative icons */}
@@ -67,7 +68,7 @@ export default function Home() {
                 className="pointer-events-none absolute"
                 style={{
                   top: item.top, right: item.right, left: item.left, bottom: item.bottom,
-                  color: "rgba(255,255,255,0.2)",
+                  color: "rgba(0,0,0,0.18)",
                   animation: `bobFloat ${3 + i * 0.5}s ease-in-out infinite`,
                   animationDelay: `${item.delay}s`,
                 }}
@@ -85,8 +86,8 @@ export default function Home() {
                 width: 72,
                 height: "auto",
                 marginBottom: 16,
-                filter: "brightness(0) invert(1)",
-                opacity: 0.95,
+                filter: "brightness(0)",
+                opacity: 0.9,
                 display: "inline-block",
               }}
               initial={{ scale: 0, rotate: -10 }}
@@ -94,7 +95,7 @@ export default function Home() {
               transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1], delay: 0.2 }}
             />
             <h2 className="font-display mb-3 text-3xl font-bold">TalkRai</h2>
-            <p className="font-thai text-base text-white/95">
+            <p className="font-thai text-base" style={{ color: "var(--color-ink-950)", opacity: 0.85 }}>
               AI-powered interactive roleplay
             </p>
           </div>
@@ -140,11 +141,12 @@ export default function Home() {
         {!isLoggedIn && !isInClient && (
           <motion.button
             onClick={login}
-            className="font-thai w-full rounded-[var(--radius-md)] py-4 text-base font-bold text-white transition-all active:scale-[0.98]"
+            className="font-thai w-full rounded-[var(--radius-md)] py-4 text-base font-bold transition-all active:scale-[0.98]"
             style={{
               background:
                 "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
-              boxShadow: "0 6px 16px rgba(249, 109, 75, 0.2)",
+              color: "var(--color-ink-950)",
+              boxShadow: "var(--shadow-card)",
             }}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}

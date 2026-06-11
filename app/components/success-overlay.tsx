@@ -76,8 +76,7 @@ export function ToastBanner({
             borderRadius: 16,
             background: config.bg,
             border: `1.5px solid ${config.border}`,
-            boxShadow:
-              "0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)",
+            boxShadow: "var(--shadow-card)",
           }}
         >
           <div
@@ -88,7 +87,7 @@ export function ToastBanner({
               width: 36,
               height: 36,
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.7)",
+              background: "rgba(0,0,0,0.25)",
               flexShrink: 0,
             }}
           >

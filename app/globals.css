@@ -1,64 +1,125 @@
 @import "tailwindcss";
 
-/* ══════════════════════════════════════════
-   TalkRai Design Tokens
-   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   TalkRai — "Midnight Theatre" Design System (LIFF app / product)
+   Shares tokens, fonts, and motion with landing-page. See /DESIGN.md.
+
+   The app's CSS Modules reference the legacy variable NAMES below
+   (--cream, --gray-800, --coral-500, ...). Those names are remapped
+   here to dark Midnight values, so the whole app inherits the dark
+   theme. New code should prefer the Tailwind tokens (bg-ink-900,
+   text-bone, text-gold-400) defined in @theme.
+   ══════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* Ink — warm espresso-plum surfaces */
+  --color-ink-950: oklch(0.145 0.012 350);
+  --color-ink-900: oklch(0.178 0.016 350);
+  --color-ink-850: oklch(0.215 0.018 348);
+  --color-ink-800: oklch(0.255 0.020 346);
+  --color-ink-750: oklch(0.305 0.022 344);
+  --color-ink-700: oklch(0.370 0.022 342);
+  --color-ink-600: oklch(0.460 0.020 340);
+
+  /* Bone — warm off-whites */
+  --color-bone:       oklch(0.940 0.015 75);
+  --color-bone-dim:   oklch(0.820 0.017 70);
+  --color-bone-muted: oklch(0.660 0.016 64);
+  --color-bone-faint: oklch(0.520 0.014 58);
+
+  /* Gold — champagne accent */
+  --color-gold-200: oklch(0.910 0.050 86);
+  --color-gold-300: oklch(0.865 0.075 84);
+  --color-gold-400: oklch(0.815 0.100 81);
+  --color-gold-500: oklch(0.745 0.115 78);
+  --color-gold-600: oklch(0.660 0.105 75);
+
+  /* Rose — ember warmth */
+  --color-rose-300: oklch(0.815 0.080 18);
+  --color-rose-400: oklch(0.735 0.140 15);
+  --color-rose-500: oklch(0.655 0.180 13);
+
+  /* Mint — success / positive (credits) */
+  --color-mint-400: oklch(0.760 0.130 158);
+  --color-mint-500: oklch(0.700 0.150 158);
+
+  --color-line-green: #06C755;
+  --color-line-green-bright: #1FE06B;
+
+  /* Fonts (shared with landing) */
+  --font-display: var(--font-trirong), "Trirong", Georgia, serif;
+  --font-display-latin: var(--font-bodoni), "Bodoni Moda", Georgia, serif;
+  --font-body: var(--font-anuphan), "Anuphan", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-trirong), "Trirong", Georgia, serif;
+  --font-thai: var(--font-anuphan), "Anuphan", ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Legacy token remap — the app's CSS Modules read these names.
+   Light-theme semantics inverted to the dark Midnight palette.
+   ══════════════════════════════════════════════════════════════ */
 :root {
-  /* Neutrals */
-  --cream: #FFF8F0;
-  --warm-white: #FFFDFB;
-  --soft-ivory: #FEF6EC;
-  --blush: #FFF0EA;
+  /* Surfaces (were light) → dark */
+  --cream:        oklch(0.178 0.016 350);  /* page background */
+  --warm-white:   oklch(0.255 0.020 346);  /* cards / sheets / modals */
+  --soft-ivory:   oklch(0.255 0.020 346);
+  --blush:        oklch(0.215 0.018 348);
 
-  /* Coral Spectrum */
-  --coral-50: #FFF5F2;
-  --coral-100: #FFE8E0;
-  --coral-200: #FFD0C1;
-  --coral-300: #FFB09A;
-  --coral-400: #FF8B6A;
-  --coral-500: #F96D4B;
-  --coral-600: #E5542F;
-  --coral-700: #C04324;
+  /* Coral spectrum → champagne gold (primary accent) */
+  --coral-50:  oklch(0.255 0.028 72);   /* dark gold-tinted surface */
+  --coral-100: oklch(0.305 0.040 74);   /* gold chip background */
+  --coral-200: oklch(0.420 0.050 74);   /* gold border */
+  --coral-300: oklch(0.745 0.115 78);
+  --coral-400: oklch(0.815 0.100 81);
+  --coral-500: oklch(0.815 0.100 81);   /* primary accent */
+  --coral-600: oklch(0.745 0.115 78);
+  --coral-700: oklch(0.900 0.060 84);   /* light gold text for chips */
 
-  /* Lavender Spectrum */
-  --lavender-50: #F5F3FF;
-  --lavender-100: #ECE8FF;
-  --lavender-200: #DAD2FF;
-  --lavender-300: #C1B2FF;
-  --lavender-400: #A48BFF;
-  --lavender-500: #8B6BF0;
-  --lavender-600: #7C52E6;
+  /* Lavender spectrum → ember rose (secondary accent) */
+  --lavender-50:  oklch(0.250 0.035 16);
+  --lavender-100: oklch(0.305 0.055 15);
+  --lavender-200: oklch(0.420 0.070 15);
+  --lavender-300: oklch(0.735 0.140 15);
+  --lavender-400: oklch(0.735 0.140 15);
+  --lavender-500: oklch(0.800 0.110 16);
+  --lavender-600: oklch(0.860 0.080 18);
 
-  /* Mint Spectrum */
-  --mint-50: #EDFCF5;
-  --mint-100: #D3F8E4;
-  --mint-300: #72E3B2;
-  --mint-400: #3ACE92;
-  --mint-500: #18B47A;
+  /* Mint spectrum → success green (tuned for dark) */
+  --mint-50:  oklch(0.250 0.035 158);
+  --mint-100: oklch(0.305 0.055 158);
+  --mint-300: oklch(0.700 0.150 158);
+  --mint-400: oklch(0.760 0.130 158);
+  --mint-500: oklch(0.700 0.150 158);
 
-  /* Grays */
-  --gray-50: #FAF9F7;
-  --gray-100: #F3F1EE;
-  --gray-200: #E8E4DF;
-  --gray-300: #D5CFC8;
-  --gray-400: #B8AFA5;
-  --gray-500: #9B9186;
-  --gray-600: #7D7368;
-  --gray-700: #5E564D;
-  --gray-800: #423C36;
-  --gray-900: #2A2521;
+  /* Grays → ink surfaces + bone text */
+  --gray-50:  oklch(0.255 0.020 346);  /* sub-card surface */
+  --gray-100: oklch(0.305 0.022 344);  /* pill / active fill */
+  --gray-200: oklch(0.355 0.022 344);  /* borders / skeleton base */
+  --gray-300: oklch(0.430 0.020 342);  /* handle bar / fallback icon */
+  --gray-400: oklch(0.520 0.014 58);   /* faint labels */
+  --gray-500: oklch(0.660 0.016 64);   /* secondary text */
+  --gray-600: oklch(0.660 0.016 64);   /* secondary text */
+  --gray-700: oklch(0.820 0.017 70);   /* body text */
+  --gray-800: oklch(0.940 0.015 75);   /* primary text */
+  --gray-900: oklch(0.940 0.015 75);   /* primary text */
 
-  /* Brand */
   --line-green: #06C755;
 
-  /* Shadows */
-  --shadow-card: 0 1px 8px rgba(42, 37, 33, 0.06), 0 1px 2px rgba(42, 37, 33, 0.04);
-  --shadow-card-hover: 0 6px 20px rgba(42, 37, 33, 0.10), 0 2px 4px rgba(42, 37, 33, 0.05);
-  --shadow-sheet: 0 -8px 40px rgba(42, 37, 33, 0.12), 0 -2px 12px rgba(42, 37, 33, 0.06);
-  --shadow-glow-coral: 0 4px 20px rgba(249, 109, 75, 0.2), 0 0 0 1px rgba(249, 109, 75, 0.15);
-  --shadow-glow-lavender: 0 4px 20px rgba(139, 107, 240, 0.2), 0 0 0 1px rgba(139, 107, 240, 0.15);
+  /* Depth — deeper on dark, plus glows */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 26px rgb(0 0 0 / 0.30);
+  --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.45), 0 18px 50px rgb(0 0 0 / 0.40);
+  --shadow-sheet: 0 -10px 50px rgb(0 0 0 / 0.55), 0 -2px 14px rgb(0 0 0 / 0.35);
+  --shadow-glow-coral: 0 8px 30px oklch(0.815 0.100 81 / 0.22), 0 0 0 1px oklch(0.815 0.100 81 / 0.20);
+  --shadow-glow-lavender: 0 8px 30px oklch(0.735 0.140 15 / 0.22), 0 0 0 1px oklch(0.735 0.140 15 / 0.20);
 
-  /* Border Radius */
+  /* Hairlines (use for borders on dark) */
+  --hairline: oklch(0.940 0.015 75 / 0.10);
+  --hairline-strong: oklch(0.940 0.015 75 / 0.16);
+
+  /* Border Radius (unchanged names) */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
@@ -66,109 +127,72 @@
   --radius-full: 9999px;
 }
 
-/* ══════════════════════════════════════════
-   Tailwind Theme Integration
-   ══════════════════════════════════════════ */
-@theme inline {
-  --color-cream: var(--cream);
-  --color-warm-white: var(--warm-white);
-  --color-soft-ivory: var(--soft-ivory);
-  --color-blush: var(--blush);
-
-  --color-coral-50: var(--coral-50);
-  --color-coral-100: var(--coral-100);
-  --color-coral-200: var(--coral-200);
-  --color-coral-300: var(--coral-300);
-  --color-coral-400: var(--coral-400);
-  --color-coral-500: var(--coral-500);
-  --color-coral-600: var(--coral-600);
-  --color-coral-700: var(--coral-700);
-
-  --color-lavender-50: var(--lavender-50);
-  --color-lavender-100: var(--lavender-100);
-  --color-lavender-200: var(--lavender-200);
-  --color-lavender-300: var(--lavender-300);
-  --color-lavender-400: var(--lavender-400);
-  --color-lavender-500: var(--lavender-500);
-  --color-lavender-600: var(--lavender-600);
-
-  --color-mint-50: var(--mint-50);
-  --color-mint-100: var(--mint-100);
-  --color-mint-300: var(--mint-300);
-  --color-mint-400: var(--mint-400);
-  --color-mint-500: var(--mint-500);
-
-  --color-tgray-50: var(--gray-50);
-  --color-tgray-100: var(--gray-100);
-  --color-tgray-200: var(--gray-200);
-  --color-tgray-300: var(--gray-300);
-  --color-tgray-400: var(--gray-400);
-  --color-tgray-500: var(--gray-500);
-  --color-tgray-600: var(--gray-600);
-  --color-tgray-700: var(--gray-700);
-  --color-tgray-800: var(--gray-800);
-  --color-tgray-900: var(--gray-900);
-
-  --color-line-green: var(--line-green);
-
-  --font-display: var(--font-quicksand), "Quicksand", sans-serif;
-  --font-body: var(--font-plus-jakarta), "Plus Jakarta Sans", var(--font-ibm-thai), "IBM Plex Sans Thai", -apple-system, sans-serif;
-  --font-thai: var(--font-ibm-thai), "IBM Plex Sans Thai", sans-serif;
-}
-
-/* ══════════════════════════════════════════
-   Base Styles
-   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   Base
+   ══════════════════════════════════════════════════════════════ */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
   font-family: var(--font-body);
-  background: var(--cream);
-  color: var(--gray-800);
+  background: var(--color-ink-900);
+  color: var(--color-bone);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
   min-height: 100vh;
   min-height: 100dvh;
 }
 
-/* Subtle grain overlay texture */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: oklch(0.735 0.140 15 / 0.35);
+  color: var(--color-bone);
+}
+
+/* Cinematic film grain */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
-  background-size: 256px 256px;
+  background-size: 220px 220px;
+  mix-blend-mode: overlay;
 }
 
-/* ══════════════════════════════════════════
-   Shared Components
-   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   Shared component classes (used across pages via className)
+   ══════════════════════════════════════════════════════════════ */
 
-/* Page Wrapper - constrains content to mobile width */
+/* Page Wrapper — mobile column */
 .page-wrapper {
   position: relative;
   z-index: 1;
   min-height: 100vh;
   max-width: 540px;
   margin: 0 auto;
-  background: var(--cream);
+  background: var(--color-ink-900);
 }
 
-/* Sticky Frosted Glass Header */
+/* Sticky frosted header — dark glass */
 .page-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 248, 240, 0.88);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border-bottom: 1px solid rgba(232, 228, 223, 0.6);
+  background: oklch(0.145 0.012 350 / 0.80);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border-bottom: 1px solid var(--hairline);
   padding: 0 16px;
 }
 
@@ -184,34 +208,36 @@ body::before {
 .header-title {
   font-family: var(--font-display);
   font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--gray-800);
+  font-weight: 500;
+  color: var(--color-bone);
+  letter-spacing: -0.01em;
 }
 
-/* Section Labels */
+/* Section label — gold kicker */
 .section-label {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--coral-500);
+  letter-spacing: 0.22em;
+  color: var(--color-gold-400);
   margin-bottom: 12px;
   display: block;
 }
 
-/* Card base */
+/* Card base — dark surface, full hairline border */
 .card {
-  background: var(--warm-white);
+  background: var(--color-ink-800);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  border: 1px solid var(--gray-200);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid var(--hairline);
+  transition: transform 0.3s var(--ease-out-quart), box-shadow 0.3s var(--ease-out-quart), border-color 0.3s;
 }
 
 @media (hover: hover) {
   .card:hover {
     box-shadow: var(--shadow-card-hover);
+    border-color: var(--hairline-strong);
     transform: translateY(-2px);
   }
 }
@@ -221,101 +247,54 @@ body::before {
   transition-duration: 0.1s;
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
    Animations
-   ══════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════ */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes popIn {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  70% {
-    transform: scale(1.15);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
-
 @keyframes shimmer {
   0% { background-position: -400px 0; }
   100% { background-position: 400px 0; }
 }
-
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
 
-@keyframes sparkle {
-  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
-  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(249, 109, 75, 0.15); }
-  50% { box-shadow: 0 0 20px rgba(249, 109, 75, 0.3); }
-}
-
-@keyframes shimmerSweep {
-  0% { transform: translateX(-150%); }
-  100% { transform: translateX(150%); }
-}
-
-@keyframes bobFloat {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  33% { transform: translateY(-6px) rotate(1deg); }
-  66% { transform: translateY(-3px) rotate(-1deg); }
-}
-
-/* ══════════════════════════════════════════
-   Skeleton Utilities
-   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   Skeleton
+   ══════════════════════════════════════════════════════════════ */
 .skeleton-line,
 .skeleton-rect,
 .skeleton-circle {
-  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-50) 50%, var(--gray-100) 75%);
-  background-size: 800px 100%;
+  background: linear-gradient(90deg, var(--color-ink-800) 25%, var(--color-ink-750) 50%, var(--color-ink-800) 75%);
+  background-size: 840px 100%;
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
-.skeleton-line {
-  height: 12px;
-  border-radius: 6px;
-}
-
-.skeleton-rect {
-  border-radius: var(--radius-md);
-}
-
-.skeleton-circle {
-  border-radius: 50%;
-}
+.skeleton-line { height: 12px; border-radius: 6px; }
+.skeleton-rect { border-radius: var(--radius-md); }
+.skeleton-circle { border-radius: 50%; }

@@ -113,14 +113,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.7);
+  background: oklch(0.145 0.012 350 / 0.85);
   backdrop-filter: blur(8px);
   border-radius: var(--radius-full);
   padding: 6px 14px;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--gray-700);
-  border: 1px solid rgba(232, 228, 223, 0.5);
+  border: 1px solid var(--hairline);
 }
 
 /* ══════════════════════════════════════════
@@ -174,10 +174,10 @@
 }
 
 .packageRecommended {
-  color: white;
-  box-shadow: 0 8px 32px rgba(249, 109, 75, 0.25), 0 2px 8px rgba(249, 109, 75, 0.15);
+  color: var(--color-ink-950);
+  box-shadow: var(--shadow-glow-coral);
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--color-gold-400);
   transform: scale(1.04);
   z-index: 2;
 }
@@ -204,7 +204,7 @@
 
 @media (hover: hover) {
   .packageRecommended:hover {
-    box-shadow: 0 12px 40px rgba(249, 109, 75, 0.3), 0 4px 12px rgba(249, 109, 75, 0.2);
+    box-shadow: var(--shadow-glow-coral), var(--shadow-card-hover);
     transform: scale(1.04) translateY(-3px);
   }
 }
@@ -236,8 +236,8 @@
 }
 
 .badgeRecommended {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+  background: oklch(0.145 0.012 350 / 0.18);
+  color: var(--color-ink-950);
 }
 
 .badgeBestValue {
@@ -337,8 +337,8 @@
 }
 
 .packageCtaRecommended {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+  background: oklch(0.145 0.012 350 / 0.18);
+  color: var(--color-ink-950);
   backdrop-filter: blur(4px);
 }
 
@@ -356,7 +356,7 @@
   left: 50%;
   transform: translateX(-50%);
   background: var(--gray-800);
-  color: white;
+  color: var(--color-ink-950);
   font-size: 0.65rem;
   font-weight: 500;
   padding: 3px 8px;
@@ -401,7 +401,6 @@
   background: var(--warm-white);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--gray-200);
-  border-left: 3px solid transparent;
   transition: all 0.2s ease;
 }
 
@@ -412,11 +411,11 @@
 }
 
 .transactionPositive {
-  border-left-color: var(--mint-500);
+  border-color: var(--mint-500);
 }
 
 .transactionNegative {
-  border-left-color: var(--coral-400);
+  border-color: var(--coral-400);
 }
 
 .transactionIcon {

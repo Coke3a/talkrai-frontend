@@ -167,7 +167,7 @@ export default function StatusPage() {
             </p>
             <button
               onClick={login}
-              className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+              className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-[var(--color-ink-950)]"
               style={{
                 background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
               }}

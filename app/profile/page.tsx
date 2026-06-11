@@ -76,7 +76,7 @@ export default function ProfilePage() {
             </p>
             <button
               onClick={login}
-              className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+              className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-[var(--color-ink-950)]"
               style={{
                 background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
               }}
@@ -121,10 +121,10 @@ export default function ProfilePage() {
               <div className={styles.avatarRing} />
               {/* Sparkle decorations */}
               <div className={styles.avatarSparkle} style={{ top: -4, right: -4 }}>
-                <Sparkles size={14} color="rgba(255,255,255,0.7)" />
+                <Sparkles size={14} color="oklch(0.145 0.012 350 / 0.7)" />
               </div>
               <div className={styles.avatarSparkle} style={{ bottom: 8, left: -6, animationDelay: '1s' }}>
-                <Sparkles size={10} color="rgba(255,255,255,0.5)" />
+                <Sparkles size={10} color="oklch(0.145 0.012 350 / 0.5)" />
               </div>
               <Image
                 src={pictureUrl}

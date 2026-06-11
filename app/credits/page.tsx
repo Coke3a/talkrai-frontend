@@ -19,7 +19,7 @@ import { InactiveUserState } from "../components/inactive-user-state";
 import { EmptyState } from "../components/empty-state";
 import { ToastBanner } from "../components/success-overlay";
 import { getTransactionIcon } from "@/app/lib/icons";
-import { Coffee, Sparkles, Gem, TrendingUp, MessageCircle, AlertTriangle, Receipt, Coins } from "lucide-react";
+import { Coffee, Sparkles, Gem, TrendingUp, MessageCircle, AlertTriangle, Receipt } from "lucide-react";
 import styles from "./credits.module.css";
 
 // ── Constants (product config, not user data) ────────────
@@ -168,7 +168,7 @@ function CreditsContent() {
             </p>
             <button
               onClick={login}
-              className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-white"
+              className="font-thai rounded-[var(--radius-md)] px-8 py-3 text-sm font-bold text-[var(--color-ink-950)]"
               style={{
                 background: "linear-gradient(135deg, var(--coral-500) 0%, var(--coral-600) 100%)",
               }}
@@ -209,11 +209,6 @@ function CreditsContent() {
               background: "radial-gradient(circle, rgba(249, 109, 75, 0.15) 0%, transparent 70%)",
             }}
           />
-
-          {/* Floating coin particles */}
-          <Coins size={16} className={styles.heroParticle} style={{ top: '15%', left: '12%', color: 'var(--coral-300)' }} />
-          <Coins size={12} className={styles.heroParticle} style={{ top: '25%', right: '15%', color: 'var(--lavender-300)' }} />
-          <Sparkles size={14} className={styles.heroParticle} style={{ bottom: '20%', left: '20%', color: 'var(--coral-200)' }} />
 
           <div className="relative z-10">
             <p className={`${styles.heroLabel} font-thai`}>เครดิตคงเหลือ</p>
@@ -357,9 +352,9 @@ const PackageCard = memo(function PackageCard({
     }
   })();
 
-  const dividerBg = pkg.tier === "recommended" ? "rgba(255,255,255,0.3)" : "var(--gray-200)";
-  const textColor = pkg.tier === "recommended" ? "white" : "var(--gray-800)";
-  const subTextColor = pkg.tier === "recommended" ? "rgba(255,255,255,0.7)" : undefined;
+  const dividerBg = pkg.tier === "recommended" ? "rgba(0,0,0,0.18)" : "var(--gray-200)";
+  const textColor = pkg.tier === "recommended" ? "var(--color-ink-950)" : "var(--gray-800)";
+  const subTextColor = pkg.tier === "recommended" ? "oklch(0.145 0.012 350 / 0.7)" : undefined;
 
   return (
     <div
@@ -392,10 +387,10 @@ const PackageCard = memo(function PackageCard({
         return (
           <div className={styles.packageIconWrapper} style={
             pkg.tier === "recommended"
-              ? { background: "rgba(255,255,255,0.2)" }
+              ? { background: "rgba(0,0,0,0.12)" }
               : { background: "var(--coral-50)" }
           }>
-            <PkgIcon size={20} color={pkg.tier === "recommended" ? "white" : "var(--coral-500)"} />
+            <PkgIcon size={20} color={pkg.tier === "recommended" ? "var(--color-ink-950)" : "var(--coral-500)"} />
           </div>
         );
       })()}

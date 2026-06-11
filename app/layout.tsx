@@ -1,25 +1,31 @@
 import type { Metadata, Viewport } from "next";
-import { Quicksand, Plus_Jakarta_Sans, IBM_Plex_Sans_Thai } from "next/font/google";
+import { Trirong, Anuphan, Bodoni_Moda } from "next/font/google";
 import { LiffProvider } from "./providers/liff-provider";
 import { ErrorBoundary } from "./components/error-boundary";
 import "./globals.css";
 
-const quicksand = Quicksand({
-  variable: "--font-quicksand",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+// Shared with landing-page — see /DESIGN.md
+const trirong = Trirong({
+  variable: "--font-trirong",
+  subsets: ["latin", "thai"],
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+const anuphan = Anuphan({
+  variable: "--font-anuphan",
+  subsets: ["latin", "thai"],
+  weight: ["300", "400", "500", "600"],
+  display: "swap",
 });
 
-const ibmPlexSansThai = IBM_Plex_Sans_Thai({
-  variable: "--font-ibm-thai",
-  subsets: ["thai"],
-  weight: ["300", "400", "500", "600", "700"],
+const bodoni = Bodoni_Moda({
+  variable: "--font-bodoni",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -55,7 +61,7 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body
-        className={`${quicksand.variable} ${plusJakartaSans.variable} ${ibmPlexSansThai.variable} antialiased`}
+        className={`${trirong.variable} ${anuphan.variable} ${bodoni.variable} antialiased`}
       >
         <LiffProvider>
           <ErrorBoundary>{children}</ErrorBoundary>
