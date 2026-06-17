@@ -20,7 +20,7 @@
   width: 200px;
   height: 200px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.15);
+  background: oklch(0.940 0.015 75 / 0.15);
   pointer-events: none;
 }
 
@@ -31,7 +31,7 @@
   width: 150px;
   height: 150px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: oklch(0.940 0.015 75 / 0.10);
   pointer-events: none;
 }
 
@@ -260,7 +260,7 @@
   align-self: flex-end;
   max-width: 80%;
   background: var(--line-green);
-  color: white;
+  color: var(--color-bone);
   border-radius: 18px 18px 4px 18px;
   padding: 10px 14px;
   font-size: 0.82rem;

@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
               width: 56,
               height: 56,
               borderRadius: "50%",
-              background: "var(--coral-50, #FFF5F2)",
+              background: "var(--coral-50, oklch(0.255 0.028 72))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
             style={{
               fontSize: 18,
               fontWeight: 700,
-              color: "var(--gray-900, #2A2521)",
+              color: "var(--gray-900, oklch(0.940 0.015 75))",
               marginBottom: 8,
             }}
           >
@@ -63,7 +63,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <p
             style={{
               fontSize: 14,
-              color: "var(--gray-500, #9A938B)",
+              color: "var(--gray-500, oklch(0.660 0.016 64))",
               marginBottom: 24,
               maxWidth: 320,
             }}
@@ -77,7 +77,7 @@ export class ErrorBoundary extends Component<Props, State> {
               borderRadius: 12,
               border: "none",
               background:
-                "linear-gradient(135deg, var(--coral-500, #F96D4B) 0%, var(--coral-600, #E05A39) 100%)",
+                "linear-gradient(135deg, var(--coral-500, oklch(0.815 0.100 81)) 0%, var(--coral-600, oklch(0.745 0.115 78)) 100%)",
               color: "var(--color-ink-950)",
               fontSize: 14,
               fontWeight: 700,

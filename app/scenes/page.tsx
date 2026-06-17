@@ -64,38 +64,45 @@ function parseDialogueBlocks(text: string): DialogueBlock[] {
 
 // ── Tag Taglines & Colors ──────────────────────────────────
 
+// Midnight Theatre: a single champagne-gold accent, with ember-rose reserved
+// (sparingly) for the affectionate/romance archetypes. See /DESIGN.md.
+const ACCENT_GOLD = "var(--color-gold-400)";
+const ACCENT_ROSE = "var(--color-rose-400)";
+
 const TAG_TAGLINES: Record<string, { tagline: string; color: string }> = {
-  tsundere: { tagline: "ปากไม่ตรงกับใจ", color: "#F96D4B" },
-  cheerful: { tagline: "ยิ้มทั้งวัน หัวเราะทั้งคืน", color: "#F5A623" },
-  caring: { tagline: "คนที่จะดูแลเธอเสมอ", color: "#FF8FAB" },
-  mysterious: { tagline: "รู้ทุกอย่าง แต่ไม่บอกสักคำ", color: "#8B6BF0" },
-  shy: { tagline: "แก้มแดงง่ายกว่าที่คิด", color: "#A48BFF" },
-  confident: { tagline: "ไม่แคร์สายตาใคร", color: "#D4A017" },
-  flirty: { tagline: "หยุดใจไม่อยู่ ถอนตัวไม่ทัน", color: "#E91E76" },
-  serious: { tagline: "จริงจัง ไม่เล่นๆ", color: "#7D7368" },
-  sensitive: { tagline: "หัวใจบาง รู้สึกลึกกว่าใคร", color: "#6BA3F0" },
-  cute: { tagline: "น่ารักจนต้องมองซ้ำ", color: "#FF8FAB" },
-  cool: { tagline: "เท่จนใจสั่น", color: "#5E564D" },
-  elegant: { tagline: "สง่างาม ดูแพงทุกมุม", color: "#8B6BF0" },
-  sporty: { tagline: "พลังเหลือเฟือ หัวใจนักสู้", color: "#F5A623" },
-  gentle_look: { tagline: "อ่อนโยนจนใจละลาย", color: "#A48BFF" },
-  wild: { tagline: "อันตราย แต่เสน่ห์แรง", color: "#F96D4B" },
-  intellectual: { tagline: "ฉลาดจนน่าหลงใหล", color: "#6BA3F0" },
+  tsundere: { tagline: "ปากไม่ตรงกับใจ", color: ACCENT_GOLD },
+  cheerful: { tagline: "ยิ้มทั้งวัน หัวเราะทั้งคืน", color: ACCENT_GOLD },
+  caring: { tagline: "คนที่จะดูแลเธอเสมอ", color: ACCENT_ROSE },
+  mysterious: { tagline: "รู้ทุกอย่าง แต่ไม่บอกสักคำ", color: ACCENT_GOLD },
+  shy: { tagline: "แก้มแดงง่ายกว่าที่คิด", color: ACCENT_GOLD },
+  confident: { tagline: "ไม่แคร์สายตาใคร", color: ACCENT_GOLD },
+  flirty: { tagline: "หยุดใจไม่อยู่ ถอนตัวไม่ทัน", color: ACCENT_ROSE },
+  serious: { tagline: "จริงจัง ไม่เล่นๆ", color: ACCENT_GOLD },
+  sensitive: { tagline: "หัวใจบาง รู้สึกลึกกว่าใคร", color: ACCENT_GOLD },
+  cute: { tagline: "น่ารักจนต้องมองซ้ำ", color: ACCENT_ROSE },
+  cool: { tagline: "เท่จนใจสั่น", color: ACCENT_GOLD },
+  elegant: { tagline: "สง่างาม ดูแพงทุกมุม", color: ACCENT_GOLD },
+  sporty: { tagline: "พลังเหลือเฟือ หัวใจนักสู้", color: ACCENT_GOLD },
+  gentle_look: { tagline: "อ่อนโยนจนใจละลาย", color: ACCENT_ROSE },
+  wild: { tagline: "อันตราย แต่เสน่ห์แรง", color: ACCENT_GOLD },
+  intellectual: { tagline: "ฉลาดจนน่าหลงใหล", color: ACCENT_GOLD },
 };
 
 // ── Atmosphere Mood Labels ─────────────────────────────────
 
+// Mood chips render as dark tinted pills (accent text + hairline) built from
+// the accent below — no light pastel fills (Midnight Theatre, see /DESIGN.md).
 const ATMOSPHERE_MOOD_LABELS: Record<
   string,
-  { label: string; bg: string; color: string }
+  { label: string; accent: string }
 > = {
-  romantic:    { label: "โรแมนติก",  bg: "#FFE4EC", color: "#B5184D" },
-  cozy:        { label: "อบอุ่นใจ",   bg: "#FFF3E0", color: "#A05C00" },
-  tense:       { label: "ตึงเครียด",  bg: "#EEF2FF", color: "#3949AB" },
-  mysterious:  { label: "ลึกลับ",     bg: "#F3E5F5", color: "#6A1B9A" },
-  playful:     { label: "สนุกสนาน",  bg: "#E8F5E9", color: "#2E7D32" },
-  melancholic: { label: "เศร้าหมอง", bg: "#E3F2FD", color: "#1565C0" },
-  exciting:    { label: "ตื่นเต้น",   bg: "#FFF3E0", color: "#E65100" },
+  romantic:    { label: "โรแมนติก",  accent: ACCENT_ROSE },
+  cozy:        { label: "อบอุ่นใจ",   accent: ACCENT_ROSE },
+  tense:       { label: "ตึงเครียด",  accent: ACCENT_GOLD },
+  mysterious:  { label: "ลึกลับ",     accent: ACCENT_GOLD },
+  playful:     { label: "สนุกสนาน",  accent: ACCENT_GOLD },
+  melancholic: { label: "เศร้าหมอง", accent: ACCENT_GOLD },
+  exciting:    { label: "ตื่นเต้น",   accent: ACCENT_ROSE },
 };
 
 function parseAtmosphereSummary(summary: string): {
@@ -568,9 +575,9 @@ export default function ScenesPage() {
                     <div
                       className={styles.cardTagBadge}
                       style={{
-                        backgroundColor:
-                          (TAG_TAGLINES[scene.character.personality_tags[0]]
-                            ?.color ?? "var(--lavender-500)") + "C0",
+                        color:
+                          TAG_TAGLINES[scene.character.personality_tags[0]]
+                            ?.color ?? ACCENT_GOLD,
                       }}
                     >
                       {tagMap?.get(scene.character.personality_tags[0]) ??
@@ -754,8 +761,9 @@ export default function ScenesPage() {
                         <span
                           className={styles.atmosphereMoodTag}
                           style={{
-                            background: moodDef.bg,
-                            color: moodDef.color,
+                            background: `color-mix(in oklab, ${moodDef.accent} 14%, transparent)`,
+                            color: moodDef.accent,
+                            border: `1px solid color-mix(in oklab, ${moodDef.accent} 32%, transparent)`,
                           }}
                         >
                           {moodDef.label}

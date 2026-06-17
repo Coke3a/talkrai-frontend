@@ -189,9 +189,9 @@
   background: linear-gradient(
     105deg,
     transparent 40%,
-    rgba(255, 255, 255, 0.15) 45%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.15) 55%,
+    oklch(0.940 0.015 75 / 0.15) 45%,
+    oklch(0.940 0.015 75 / 0.25) 50%,
+    oklch(0.940 0.015 75 / 0.15) 55%,
     transparent 60%
   );
   animation: shimmerSweep 3s ease-in-out infinite;

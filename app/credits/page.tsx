@@ -206,7 +206,7 @@ function CreditsContent() {
           <div
             className={styles.heroGlow}
             style={{
-              background: "radial-gradient(circle, rgba(249, 109, 75, 0.15) 0%, transparent 70%)",
+              background: "radial-gradient(circle, oklch(0.815 0.100 81 / 0.15) 0%, transparent 70%)",
             }}
           />
 

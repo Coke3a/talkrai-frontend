@@ -28,7 +28,7 @@ const VARIANT_CONFIG = {
   },
   error: {
     Icon: XCircle,
-    bg: "linear-gradient(135deg, var(--coral-50, #FFF5F3) 0%, var(--coral-100, #FFE8E3) 100%)",
+    bg: "linear-gradient(135deg, var(--coral-50, oklch(0.255 0.028 72)) 0%, var(--coral-100, oklch(0.305 0.040 74)) 100%)",
     border: "var(--coral-200)",
     iconColor: "var(--coral-500)",
     textColor: "var(--coral-700, var(--gray-800))",
