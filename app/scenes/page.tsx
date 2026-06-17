@@ -13,7 +13,7 @@ import Image from "next/image";
 import { PageHeader } from "../components/page-header";
 import { ErrorState } from "../components/error-state";
 import { InactiveUserState } from "../components/inactive-user-state";
-import { SuccessOverlay } from "../components/success-overlay";
+import { ChatPreviewDemo } from "../components/chat-preview-demo";
 import { ImageOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./scenes.module.css";
@@ -217,7 +217,7 @@ export default function ScenesPage() {
   const [showConfirmChange, setShowConfirmChange] = useState(false);
   const [startingSession, setStartingSession] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showChatDemo, setShowChatDemo] = useState(false);
 
   // Latest section load-more
   const [latestLimit, setLatestLimit] = useState(20);
@@ -320,11 +320,10 @@ export default function ScenesPage() {
     try {
       await startSession(selectedScene.id);
 
-      if (isInClient) {
-        liff.closeWindow();
-      } else {
-        setShowSuccess(true);
-      }
+      // Show the animated chat-preview teaching screen in BOTH contexts
+      // (in-client no longer closes silently). Its CTA closes the LIFF window
+      // or returns to the LINE OA depending on context.
+      setShowChatDemo(true);
     } catch (err) {
       setStartError(
         err instanceof Error ? err.message : "เกิดข้อผิดพลาด"
@@ -332,7 +331,7 @@ export default function ScenesPage() {
     } finally {
       setStartingSession(false);
     }
-  }, [selectedScene, liff, isInClient]);
+  }, [selectedScene, liff]);
 
   const handleStartSession = useCallback(async () => {
     if (!selectedScene || !liff) return;
@@ -425,14 +424,13 @@ export default function ScenesPage() {
     );
   }
 
-  // ── Success State (external browser) ────────────────
+  // ── Chat Preview Demo (after starting a session) ─────
 
-  if (showSuccess) {
+  if (showChatDemo && selectedScene) {
     return (
-      <SuccessOverlay
-        title="เริ่มเรื่องราวแล้ว!"
-        subtitle="กรุณากลับไปที่ LINE เพื่อเริ่มแชท"
-        showLineButton
+      <ChatPreviewDemo
+        characterName={selectedScene.character.name}
+        characterAvatarUrl={selectedScene.character.avatar_url ?? null}
       />
     );
   }
