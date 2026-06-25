@@ -97,9 +97,13 @@ export interface ProfileStats {
   created_at: string;
   total_sessions: number;
   total_messages: number;
-  check_in_streak: number;
   longest_streak: number;
-  next_milestone_in: number | null;
+  current_streak: number;
+  checked_in_today: boolean;
+  today_cycle_day: number; // 1..7 — which cell is "today"
+  today_credits: number;
+  days_to_chest: number;
+  weekly_credits: number[]; // 7 entries; [6] is the chest
 }
 
 export interface CreditBalance {

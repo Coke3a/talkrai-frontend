@@ -145,45 +145,144 @@
   letter-spacing: 0.5px;
 }
 
-/* Streak block (spec §B.4) — restrained, full border, no gradient */
-.streakBlock {
-  padding: 24px 20px;
-  text-align: center;
+/* Weekly check-in calendar (spec §R4.2) — full border, no gradient, no nested card */
+.checkinCalendar {
+  padding: 20px 16px;
   background: var(--color-ink-800);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
+  animation: fadeInUp 0.5s var(--ease-out-expo) both;
 }
 
-.streakNumber {
-  font-family: var(--font-display-latin);
-  font-size: 3.5rem;
-  font-weight: 600;
-  line-height: 1;
-  color: var(--color-rose-400);
+@media (prefers-reduced-motion: reduce) {
+  .checkinCalendar {
+    animation: none;
+  }
 }
 
-.streakUnit {
-  margin-top: 6px;
-  font-size: 0.95rem;
+.checkinRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.checkinSubtitle {
+  margin-bottom: 16px;
+  font-size: 0.8rem;
   color: var(--color-bone-muted);
 }
 
-.streakRecord {
-  margin-top: 14px;
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 2px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+}
+
+.cellDay {
+  font-family: var(--font-display-latin);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-bone-muted);
+}
+
+.cellGlyph {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.cellCredits {
+  font-family: var(--font-display-latin);
   font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
   color: var(--color-bone-faint);
 }
 
-.streakHint {
-  margin-top: 8px;
-  font-size: 0.8rem;
+/* State: claimed (past days in this cycle) — gold */
+.claimed {
+  border-color: var(--color-gold-400);
+}
+.claimed .cellDay,
+.claimed .cellGlyph,
+.claimed .cellCredits {
   color: var(--color-gold-400);
 }
 
-.streakInvite {
-  margin-top: 12px;
+/* State: today, already checked in — solid gold fill */
+.today {
+  background: var(--color-gold-400);
+  border-color: var(--color-gold-400);
+}
+.today .cellDay,
+.today .cellGlyph,
+.today .cellCredits {
+  color: var(--color-ink-950);
+}
+
+/* State: today, claimable — gold ring */
+.claimable {
+  border-color: var(--color-gold-400);
+  box-shadow: 0 0 0 1px var(--color-gold-400);
+}
+.claimable .cellDay,
+.claimable .cellGlyph,
+.claimable .cellCredits {
+  color: var(--color-gold-400);
+}
+
+/* State: locked (future days) — muted */
+.locked {
+  border-color: var(--hairline);
+}
+.locked .cellDay,
+.locked .cellGlyph,
+.locked .cellCredits {
+  color: var(--color-bone-faint);
+}
+
+/* State: chest (day 7) — ember rose, the visible goal even when locked */
+.chest {
+  border-color: var(--color-rose-400);
+}
+.chest .cellDay,
+.chest .cellGlyph,
+.chest .cellCredits {
+  color: var(--color-rose-400);
+}
+
+/* Chest cell that is also today — keep rose, add a ring for "you're here" */
+.chest.todayMark {
+  box-shadow: 0 0 0 1px var(--color-rose-400);
+}
+
+.checkinStreakLine {
+  margin-top: 16px;
   font-size: 0.85rem;
   color: var(--color-bone-muted);
+}
+
+.checkinStateActive {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-gold-400);
+}
+
+.checkinChest {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--color-bone-muted);
+}
+
+.checkinFaint {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--color-bone-faint);
 }
 
 /* LINE Status Card */

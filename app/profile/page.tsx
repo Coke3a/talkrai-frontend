@@ -96,9 +96,14 @@ export default function ProfilePage() {
   const createdAt = stats?.created_at ?? new Date().toISOString();
   const totalSessions = stats?.total_sessions ?? 0;
   const totalMessages = stats?.total_messages ?? 0;
-  const checkInStreak = stats?.check_in_streak ?? 0;
   const longestStreak = stats?.longest_streak ?? 0;
-  const nextMilestoneIn = stats?.next_milestone_in ?? null;
+  const currentStreak = stats?.current_streak ?? 0;
+  const checkedInToday = stats?.checked_in_today ?? false;
+  const cycleDay = stats?.today_cycle_day ?? 1;
+  const todayCredits = stats?.today_credits ?? 2;
+  const daysToChest = stats?.days_to_chest ?? 6;
+  const weeklyCredits = stats?.weekly_credits ?? [2, 3, 4, 4, 4, 4, 10];
+  const chestCredits = weeklyCredits[6];
 
   return (
     <div className="page-wrapper">
@@ -192,32 +197,85 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Streak — a visible run the user won't want to break (spec §B.4) */}
+        {/* Weekly check-in calendar — a visible, escalating run with teeth (spec §R4.2) */}
         <motion.div
           className="mb-6"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
         >
-          <span className="section-label">ต่อเนื่อง</span>
-          <div className={styles.streakBlock}>
-            <div className={styles.streakNumber}>{checkInStreak}</div>
-            <div className={`font-thai ${styles.streakUnit}`}>วัน</div>
-            {longestStreak > 0 && (
-              <div className={`font-thai ${styles.streakRecord}`}>
-                สถิติสูงสุดของคุณคือ {longestStreak} วัน
-              </div>
+          <span className="section-label">เช็คอินรายวัน</span>
+          <div className={styles.checkinCalendar}>
+            <p className={`font-thai ${styles.checkinSubtitle}`}>
+              รับเครดิตฟรีทุกวัน ยิ่งต่อเนื่องยิ่งได้เยอะ
+            </p>
+            <div className={styles.checkinRow}>
+              {weeklyCredits.map((credits, i) => {
+                const day = i + 1;
+                const isChest = day === 7;
+                const isToday = day === cycleDay;
+                const isClaimed = day < cycleDay;
+                let stateClass: string;
+                let glyph: string;
+                if (isChest) {
+                  stateClass = styles.chest;
+                  glyph = "🎁";
+                } else if (isToday) {
+                  stateClass = checkedInToday ? styles.today : styles.claimable;
+                  glyph = checkedInToday ? "◆" : "◇";
+                } else if (isClaimed) {
+                  stateClass = styles.claimed;
+                  glyph = "✓";
+                } else {
+                  stateClass = styles.locked;
+                  glyph = "·";
+                }
+                const todayEmphasis =
+                  isToday && checkedInToday ? ` ${styles.todayMark}` : "";
+                return (
+                  <div
+                    key={day}
+                    className={`${styles.cell} ${stateClass}${todayEmphasis}`}
+                  >
+                    <span className={styles.cellDay}>{day}</span>
+                    <span className={styles.cellGlyph}>{glyph}</span>
+                    <span className={styles.cellCredits}>+{credits}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className={`font-thai ${styles.checkinStreakLine}`}>
+              ต่อเนื่อง {currentStreak} วัน · สถิติสูงสุด {longestStreak} วัน
+            </p>
+
+            {checkedInToday ? (
+              <p className={`font-thai ${styles.checkinStateActive}`}>
+                ✓ เช็คอินวันนี้แล้ว
+              </p>
+            ) : currentStreak > 0 ? (
+              <p className={`font-thai ${styles.checkinStateActive}`}>
+                ทักหาเธอวันนี้ รับ +{todayCredits}
+              </p>
+            ) : (
+              <p className={`font-thai ${styles.checkinStateActive}`}>
+                เริ่ม streak ใหม่วันนี้
+              </p>
             )}
-            {checkInStreak === 0 && (
-              <div className={`font-thai ${styles.streakInvite}`}>
-                ทักหาเธอวันนี้ เพื่อเริ่มต่อเนื่อง
-              </div>
-            )}
-            {nextMilestoneIn != null && checkInStreak > 0 && (
-              <div className={`font-thai ${styles.streakHint}`}>
-                อีก {nextMilestoneIn} วัน รับโบนัสก้อนใหญ่
-              </div>
-            )}
+
+            <p className={`font-thai ${styles.checkinChest}`}>
+              {daysToChest > 0
+                ? `อีก ${daysToChest} วันเปิดกล่อง ${chestCredits} เครดิต`
+                : checkedInToday
+                  ? "เปิดกล่องวันนี้แล้ว"
+                  : `เปิดกล่องวันนี้ รับ +${chestCredits} เครดิต`}
+            </p>
+            <p className={`font-thai ${styles.checkinFaint}`}>
+              เริ่มรอบใหม่เที่ยงคืน (เวลาไทย)
+            </p>
+            <p className={`font-thai ${styles.checkinFaint}`}>
+              ขาดแม้แต่วันเดียว เริ่มนับใหม่วันที่ 1
+            </p>
           </div>
         </motion.div>
 
