@@ -96,6 +96,9 @@ export default function ProfilePage() {
   const createdAt = stats?.created_at ?? new Date().toISOString();
   const totalSessions = stats?.total_sessions ?? 0;
   const totalMessages = stats?.total_messages ?? 0;
+  const checkInStreak = stats?.check_in_streak ?? 0;
+  const longestStreak = stats?.longest_streak ?? 0;
+  const nextMilestoneIn = stats?.next_milestone_in ?? null;
 
   return (
     <div className="page-wrapper">
@@ -188,6 +191,35 @@ export default function ProfilePage() {
             </motion.div>
           </div>
         </div>
+
+        {/* Streak — a visible run the user won't want to break (spec §B.4) */}
+        <motion.div
+          className="mb-6"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
+        >
+          <span className="section-label">ต่อเนื่อง</span>
+          <div className={styles.streakBlock}>
+            <div className={styles.streakNumber}>{checkInStreak}</div>
+            <div className={`font-thai ${styles.streakUnit}`}>วัน</div>
+            {longestStreak > 0 && (
+              <div className={`font-thai ${styles.streakRecord}`}>
+                สถิติสูงสุดของคุณคือ {longestStreak} วัน
+              </div>
+            )}
+            {checkInStreak === 0 && (
+              <div className={`font-thai ${styles.streakInvite}`}>
+                ทักหาเธอวันนี้ เพื่อเริ่มต่อเนื่อง
+              </div>
+            )}
+            {nextMilestoneIn != null && checkInStreak > 0 && (
+              <div className={`font-thai ${styles.streakHint}`}>
+                อีก {nextMilestoneIn} วัน รับโบนัสก้อนใหญ่
+              </div>
+            )}
+          </div>
+        </motion.div>
 
         {/* LINE Status */}
         <motion.div

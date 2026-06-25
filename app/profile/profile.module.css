@@ -145,6 +145,47 @@
   letter-spacing: 0.5px;
 }
 
+/* Streak block (spec §B.4) — restrained, full border, no gradient */
+.streakBlock {
+  padding: 24px 20px;
+  text-align: center;
+  background: var(--color-ink-800);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+}
+
+.streakNumber {
+  font-family: var(--font-display-latin);
+  font-size: 3.5rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-rose-400);
+}
+
+.streakUnit {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: var(--color-bone-muted);
+}
+
+.streakRecord {
+  margin-top: 14px;
+  font-size: 0.8rem;
+  color: var(--color-bone-faint);
+}
+
+.streakHint {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--color-gold-400);
+}
+
+.streakInvite {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--color-bone-muted);
+}
+
 /* LINE Status Card */
 .lineStatus {
   border: 2px solid var(--line-green);

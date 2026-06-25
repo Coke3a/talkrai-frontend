@@ -15,17 +15,12 @@ import { ErrorState } from "../components/error-state";
 import { InactiveUserState } from "../components/inactive-user-state";
 import { EmptyState } from "../components/empty-state";
 import { SuccessOverlay } from "../components/success-overlay";
-import { getMoodIcon, getRelationshipIcon } from "@/app/lib/icons";
+import { getMoodIcon } from "@/app/lib/icons";
 import { MessageCircle, Calendar, MapPin, Clock, Inbox, HelpCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import styles from "./status.module.css";
 
 const RELATIONSHIP_ORDER = ["stranger", "acquaintance", "friend", "close_friend"];
-function getRelationshipProgress(level: string): number {
-  const idx = RELATIONSHIP_ORDER.indexOf(level);
-  if (idx < 0) return 0;
-  return ((idx + 1) / RELATIONSHIP_ORDER.length) * 100;
-}
 
 const MOOD_MAP: Record<string, {
   label: string;
@@ -83,7 +78,7 @@ const RELATIONSHIP_MAP: Record<string, { label: string }> = {
   stranger: { label: "คนแปลกหน้า" },
   acquaintance: { label: "คนรู้จัก" },
   friend: { label: "เพื่อน" },
-  close_friend: { label: "เพื่อนสนิท" },
+  close_friend: { label: "คนสนิท" },
 };
 
 const SUMMARY_COLLAPSE_THRESHOLD = 80;
@@ -92,6 +87,7 @@ export default function StatusPage() {
   const { isReady, liff, liffError, isInClient, isLoggedIn, login } = useLiff();
 
   const enabled = isReady && isLoggedIn && !!liff && !liffError;
+  const reduceMotion = useReducedMotion();
   const { data: sessionData, error: sessionError, mutate: mutateSession } = useCurrentSession(enabled);
 
   const session = sessionData?.session ?? null;
@@ -197,6 +193,7 @@ export default function StatusPage() {
 
   const moodData = MOOD_MAP[session.mood] ?? MOOD_MAP.neutral;
   const relData = RELATIONSHIP_MAP[session.relationship_level] ?? RELATIONSHIP_MAP.stranger;
+  const meterFraction = Math.max(0, Math.min(1, session.relationship_progress ?? 0));
   const sceneSummary = session.scene_summary ?? "";
   const isLongSummary = sceneSummary.length > SUMMARY_COLLAPSE_THRESHOLD;
   const displayedSummary =
@@ -286,42 +283,54 @@ export default function StatusPage() {
         >
           <span className="section-label">ความสัมพันธ์</span>
           <div className={`card ${styles.relationshipCard}`}>
-            <div className={styles.relationshipInner}>
-              {(() => {
-                const RelIcon = getRelationshipIcon(session.relationship_level);
-                return (
-                  <span className={styles.relationshipIcon}>
-                    <RelIcon size={22} />
-                  </span>
-                );
-              })()}
-              <span className={`font-thai ${styles.relationshipLevel}`}>
+            {/* Level name + message count */}
+            <div className={styles.meterHeadRow}>
+              <span className={`font-thai ${styles.meterLevelName}`}>
                 {relData.label}
               </span>
+              <span className={styles.meterCount}>{session.message_count}</span>
             </div>
-            {/* Progress bar */}
-            <div className={styles.progressTrack}>
+            {/* Rose relationship meter — fill scales (never width); head glows at the leading edge */}
+            <div className={styles.meterTrack}>
               <motion.div
-                className={styles.progressFill}
-                initial={{ width: 0 }}
-                animate={{ width: `${getRelationshipProgress(session.relationship_level)}%` }}
-                transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+                className={styles.meterFill}
+                initial={reduceMotion ? false : { scaleX: 0 }}
+                animate={{ scaleX: meterFraction }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { delay: 0.3, duration: 0.6, ease: [0.19, 1, 0.22, 1] }
+                }
               />
-              <div className={styles.progressLabels}>
-                {RELATIONSHIP_ORDER.map((level) => (
+              {meterFraction > 0 && (
+                <span
+                  className={styles.meterHead}
+                  style={{ left: `${meterFraction * 100}%` }}
+                />
+              )}
+            </div>
+            {/* Named milestones — reached → rose, ahead → ink */}
+            <div className={styles.meterTicks}>
+              {RELATIONSHIP_ORDER.map((level) => {
+                const reached =
+                  RELATIONSHIP_ORDER.indexOf(level) <=
+                  RELATIONSHIP_ORDER.indexOf(session.relationship_level);
+                return (
                   <span
                     key={level}
-                    className={styles.progressDot}
-                    style={{
-                      left: `${((RELATIONSHIP_ORDER.indexOf(level) + 1) / RELATIONSHIP_ORDER.length) * 100}%`,
-                      background: RELATIONSHIP_ORDER.indexOf(level) < RELATIONSHIP_ORDER.indexOf(session.relationship_level) + 1
-                        ? "var(--coral-500)"
-                        : "var(--gray-300)",
-                    }}
-                  />
-                ))}
-              </div>
+                    className={`font-thai ${styles.meterTick} ${reached ? styles.meterTickReached : ""}`}
+                  >
+                    {RELATIONSHIP_MAP[level]?.label ?? level}
+                  </span>
+                );
+              })}
             </div>
+            {/* Progress hint — the reason to send one more message */}
+            <p className={`font-thai ${styles.meterHint}`}>
+              {session.next_level_label && session.messages_to_next != null
+                ? `อีก ${session.messages_to_next} ข้อความ ก่อนจะเป็น${session.next_level_label}`
+                : "ความสัมพันธ์แน่นแฟ้นที่สุดแล้ว"}
+            </p>
           </div>
         </motion.div>
 

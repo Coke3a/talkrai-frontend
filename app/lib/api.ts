@@ -24,7 +24,16 @@ async function getLiff() {
   return liffModule;
 }
 
+const DEV_BYPASS = process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS === "true";
+const DEV_TOKEN = process.env.NEXT_PUBLIC_DEV_AUTH_TEST_TOKEN || "dev-token";
+
 async function getAuthHeaders(): Promise<HeadersInit> {
+  if (DEV_BYPASS) {
+    return {
+      Authorization: `Bearer ${DEV_TOKEN}`,
+      "Content-Type": "application/json",
+    };
+  }
   const liff = await getLiff();
   const accessToken = liff.getAccessToken();
   if (!accessToken) {
@@ -48,6 +57,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   // Token expired — logout to clear cached token, then re-login (once only)
   if (res.status === 401) {
     if (
+      !DEV_BYPASS &&
       typeof window !== "undefined" &&
       !sessionStorage.getItem(LIFF_AUTH_RETRY_KEY)
     ) {
@@ -57,8 +67,10 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
       liff.login({ redirectUri: window.location.href });
       throw new Error("Token expired — re-authenticating");
     }
-    // Already retried once this session — don't loop
-    sessionStorage.removeItem(LIFF_AUTH_RETRY_KEY);
+    // Already retried once this session or in dev bypass — don't loop
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem(LIFF_AUTH_RETRY_KEY);
+    }
     const body = await res.json().catch(() => null);
     throw new Error(body?.message || "Authentication failed");
   }
@@ -85,6 +97,9 @@ export interface ProfileStats {
   created_at: string;
   total_sessions: number;
   total_messages: number;
+  check_in_streak: number;
+  longest_streak: number;
+  next_milestone_in: number | null;
 }
 
 export interface CreditBalance {
@@ -119,6 +134,9 @@ export interface CurrentSessionData {
   message_count: number;
   scene_summary: string | null;
   created_at: string;
+  relationship_progress: number;
+  next_level_label: string | null;
+  messages_to_next: number | null;
 }
 
 export interface CurrentSessionResponse {

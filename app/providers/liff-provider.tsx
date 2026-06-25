@@ -37,8 +37,16 @@ export function LiffProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+  const devBypass = process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS === "true";
 
   useEffect(() => {
+    if (devBypass) {
+      setIsLoggedIn(true);
+      setIsInClient(false);
+      setIsReady(true);
+      return;
+    }
+
     if (!liffId) return;
 
     import("@line/liff").then((mod) => {
@@ -63,7 +71,7 @@ export function LiffProvider({ children }: { children: ReactNode }) {
           setIsReady(true);
         });
     });
-  }, [liffId]);
+  }, [liffId, devBypass]);
 
   const login = useCallback(() => {
     liffObject?.login({ redirectUri: window.location.href });
@@ -72,13 +80,13 @@ export function LiffProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       liff: liffObject,
-      liffError: liffId ? liffError : "NEXT_PUBLIC_LIFF_ID is not set",
+      liffError: devBypass || liffId ? liffError : "NEXT_PUBLIC_LIFF_ID is not set",
       isLoggedIn,
       isInClient,
-      isReady: liffId ? isReady : true,
+      isReady: devBypass || liffId ? isReady : true,
       login,
     }),
-    [liffObject, liffError, liffId, isLoggedIn, isInClient, isReady, login]
+    [liffObject, liffError, liffId, devBypass, isLoggedIn, isInClient, isReady, login]
   );
 
   return (
