@@ -431,6 +431,9 @@ export default function ScenesPage() {
       <ChatPreviewDemo
         characterName={selectedScene.character.name}
         characterAvatarUrl={selectedScene.character.avatar_url ?? null}
+        characterGender={selectedScene.character.gender}
+        sceneLocation={selectedScene.location}
+        sceneTimeOfDay={selectedScene.time_of_day}
       />
     );
   }
