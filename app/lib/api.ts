@@ -191,6 +191,25 @@ export interface StartSessionResponse {
   session_id: string;
 }
 
+export interface MeResponse {
+  terms_accepted: boolean;
+}
+
+export type LegalDocKey = "terms" | "privacy";
+
+export interface LegalSection {
+  title: string;
+  body: string;
+}
+
+export interface LegalDoc {
+  doc: LegalDocKey;
+  title: string;
+  version: number;
+  updated: string;
+  sections: LegalSection[];
+}
+
 // ── Helpers ───────────────────────────────────────────────
 
 export function formatDate(isoString: string): string {
@@ -229,6 +248,18 @@ export function fetchTags(): Promise<TagsData> {
 
 export function fetchProfile(): Promise<ProfileStats> {
   return apiFetch<ProfileStats>("/api/profile");
+}
+
+export function fetchMe(): Promise<MeResponse> {
+  return apiFetch<MeResponse>("/api/me");
+}
+
+export function acceptTerms(): Promise<MeResponse> {
+  return apiFetch<MeResponse>("/api/terms/accept", { method: "POST" });
+}
+
+export function fetchLegalDoc(doc: LegalDocKey): Promise<LegalDoc> {
+  return apiFetch<LegalDoc>(`/api/legal/${doc}`);
 }
 
 export function startSession(sceneId: string): Promise<StartSessionResponse> {

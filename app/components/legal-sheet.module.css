@@ -1,0 +1,145 @@
+/* ── In-app legal document sheet (native, no external browser) ── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1001;
+  max-width: 540px;
+  margin: 0 auto;
+  height: 86vh;
+  height: 86dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-ink-850, oklch(0.215 0.018 348));
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  box-shadow: var(--shadow-sheet);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-bone);
+}
+
+.updated {
+  margin-top: 2px;
+  font-size: 0.68rem;
+  color: var(--gray-400);
+}
+
+.close {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 18px 20px;
+}
+
+.state {
+  padding: 32px 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--gray-500);
+}
+
+.section {
+  margin-bottom: 16px;
+}
+
+.secTitle {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.subheading {
+  margin: 8px 0 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.para {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--gray-600);
+}
+
+.bullets {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bullets li {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--gray-600);
+}
+
+.foot {
+  padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--hairline);
+  background: var(--color-ink-850, oklch(0.215 0.018 348));
+}
+
+.doneBtn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--coral-500), var(--coral-600));
+  color: var(--color-ink-950);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.doneBtn:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doneBtn:active {
+    transform: none;
+  }
+}

@@ -1,14 +1,17 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useLiff } from "../providers/liff-provider";
 import {
   startSession,
+  acceptTerms,
   isUserInactiveError,
   type SceneItem,
   type TagsData,
+  type LegalDocKey,
 } from "@/app/lib/api";
-import { useScenes, useTags, useCurrentSession } from "@/app/lib/hooks";
+import { useScenes, useTags, useCurrentSession, useMe } from "@/app/lib/hooks";
 import Image from "next/image";
 import { PageHeader } from "../components/page-header";
 import { ErrorState } from "../components/error-state";
@@ -17,6 +20,12 @@ import { ChatPreviewDemo } from "../components/chat-preview-demo";
 import { ImageOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./scenes.module.css";
+
+// Legal content sheet is only needed when a user opens a consent link, so it is
+// code-split out of the main scenes bundle and loaded on first open.
+const LegalSheet = dynamic(() => import("../components/legal-sheet"), {
+  ssr: false,
+});
 
 // ── Types (page-local) ─────────────────────────────────────
 
@@ -195,6 +204,7 @@ export default function ScenesPage() {
   const { data: scenes = [], error: scenesError } = useScenes(enabled);
   const { data: tags, error: tagsError } = useTags(enabled);
   const { data: sessionData, error: sessionError } = useCurrentSession(enabled);
+  const { data: me, mutate: mutateMe } = useMe(enabled);
 
   const loading = enabled && !scenes.length && !scenesError;
   const error = scenesError?.message || tagsError?.message || sessionError?.message || null;
@@ -210,6 +220,11 @@ export default function ScenesPage() {
     };
   }, [sessionData]);
 
+  // First-time users must accept the Terms of Service before their first session.
+  // Gate only when the server has affirmatively reported not-yet-accepted; otherwise
+  // fall open (the session-start endpoint still records acceptance as a safety net).
+  const needsTerms = enabled && me?.terms_accepted === false;
+
   const [genderFilter, setGenderFilter] = useState<GenderFilter>("all");
   const [selectedScene, setSelectedScene] = useState<SceneItem | null>(null);
 
@@ -218,6 +233,12 @@ export default function ScenesPage() {
   const [startingSession, setStartingSession] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   const [showChatDemo, setShowChatDemo] = useState(false);
+
+  // Terms consent (first-time gate) + on-demand legal document sheet
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [legalDoc, setLegalDoc] = useState<LegalDocKey | null>(null);
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [legalMounted, setLegalMounted] = useState(false);
 
   // Latest section load-more
   const [latestLimit, setLatestLimit] = useState(20);
@@ -318,6 +339,14 @@ export default function ScenesPage() {
     setStartError(null);
 
     try {
+      // Record explicit Terms acceptance for first-time users before the session
+      // starts. Idempotent server-side; optimistically flip local state so the
+      // consent row disappears without a refetch.
+      if (needsTerms) {
+        await acceptTerms();
+        mutateMe({ terms_accepted: true }, { revalidate: false });
+      }
+
       await startSession(selectedScene.id);
 
       // Show the animated chat-preview teaching screen in BOTH contexts
@@ -331,7 +360,7 @@ export default function ScenesPage() {
     } finally {
       setStartingSession(false);
     }
-  }, [selectedScene, liff]);
+  }, [selectedScene, liff, needsTerms, mutateMe]);
 
   const handleStartSession = useCallback(async () => {
     if (!selectedScene || !liff) return;
@@ -348,6 +377,12 @@ export default function ScenesPage() {
     setShowConfirmChange(false);
     doStartSession();
   }, [doStartSession]);
+
+  const openLegal = useCallback((docKey: LegalDocKey) => {
+    setLegalMounted(true);
+    setLegalDoc(docKey);
+    setLegalOpen(true);
+  }, []);
 
   // ── Loading State ────────────────────────────────────
 
@@ -837,11 +872,48 @@ export default function ScenesPage() {
                 )}
               </div>
 
+              {/* Terms consent — first-time users only */}
+              {needsTerms && (
+                <label className={styles.consentRow}>
+                  <input
+                    type="checkbox"
+                    checked={agreedTerms}
+                    onChange={(e) => setAgreedTerms(e.target.checked)}
+                  />
+                  <span>
+                    ฉันอายุ 18 ปีขึ้นไป และยอมรับ{" "}
+                    <button
+                      type="button"
+                      className={styles.consentLink}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openLegal("terms");
+                      }}
+                    >
+                      ข้อกำหนดการใช้งาน
+                    </button>{" "}
+                    และ{" "}
+                    <button
+                      type="button"
+                      className={styles.consentLink}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openLegal("privacy");
+                      }}
+                    >
+                      นโยบายความเป็นส่วนตัว
+                    </button>
+                  </span>
+                </label>
+              )}
+
               {/* CTA */}
               <button
                 className={styles.ctaButton}
                 onClick={handleStartSession}
-                disabled={startingSession}
+                disabled={startingSession || (needsTerms && !agreedTerms)}
               >
                 {startingSession ? (
                   <>
@@ -889,6 +961,15 @@ export default function ScenesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Legal document sheet (lazy; opened from the consent links) */}
+      {legalMounted && (
+        <LegalSheet
+          doc={legalDoc}
+          open={legalOpen}
+          onClose={() => setLegalOpen(false)}
+        />
       )}
     </div>
   );
