@@ -1,4 +1,4 @@
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://api.talkrai.app";
 
 export class ApiError extends Error {
@@ -27,7 +27,7 @@ async function getLiff() {
 const DEV_BYPASS = process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS === "true";
 const DEV_TOKEN = process.env.NEXT_PUBLIC_DEV_AUTH_TEST_TOKEN || "dev-token";
 
-async function getAuthHeaders(): Promise<HeadersInit> {
+export async function getAuthHeaders(): Promise<HeadersInit> {
   if (DEV_BYPASS) {
     return {
       Authorization: `Bearer ${DEV_TOKEN}`,

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Trirong, Anuphan, Bodoni_Moda } from "next/font/google";
 import { LiffProvider } from "./providers/liff-provider";
 import { ErrorBoundary } from "./components/error-boundary";
+import { PageViewTracker } from "./components/page-view-tracker";
 import "./globals.css";
 
 // Shared with landing-page — see /DESIGN.md
@@ -64,6 +65,7 @@ export default function RootLayout({
         className={`${trirong.variable} ${anuphan.variable} ${bodoni.variable} antialiased`}
       >
         <LiffProvider>
+          <PageViewTracker />
           <ErrorBoundary>{children}</ErrorBoundary>
         </LiffProvider>
       </body>

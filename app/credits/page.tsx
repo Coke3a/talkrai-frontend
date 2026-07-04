@@ -11,6 +11,7 @@ import {
   isUserInactiveError,
   type TransactionItem,
 } from "@/app/lib/api";
+import { track } from "@/app/lib/analytics";
 import { useCreditBalance } from "@/app/lib/hooks";
 import { PageHeader } from "../components/page-header";
 import { LoadingState } from "../components/loading-state";
@@ -327,6 +328,7 @@ const PackageCard = memo(function PackageCard({
     if (purchasing) return;
     setPurchasing(true);
     try {
+      track("buy_credits_click", { package_id: pkg.id });
       const result = await createPayment(pkg.id);
       // Redirect to Beam payment page
       window.location.href = result.payment_url;

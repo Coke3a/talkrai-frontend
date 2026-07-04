@@ -11,6 +11,7 @@ import {
   type TagsData,
   type LegalDocKey,
 } from "@/app/lib/api";
+import { track } from "@/app/lib/analytics";
 import { useScenes, useTags, useCurrentSession, useMe } from "@/app/lib/hooks";
 import Image from "next/image";
 import { PageHeader } from "../components/page-header";
@@ -347,6 +348,7 @@ export default function ScenesPage() {
         mutateMe({ terms_accepted: true }, { revalidate: false });
       }
 
+      track("session_start_click", { scene_id: selectedScene.id });
       await startSession(selectedScene.id);
 
       // Show the animated chat-preview teaching screen in BOTH contexts
