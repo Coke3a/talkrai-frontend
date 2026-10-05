@@ -57,6 +57,13 @@ const PACKAGES = [
   },
 ];
 
+const NUDGE_SOURCES = new Set(["out_of_credits", "low_credit"]);
+
+function readNudgeSource(params: URLSearchParams | null): string | null {
+  const from = params?.get("from") ?? null;
+  return from && NUDGE_SOURCES.has(from) ? from : null;
+}
+
 // ── Transaction Helpers ────────────────────────────────────
 function getTransactionLabel(type: string): string {
   switch (type) {
@@ -85,6 +92,8 @@ export default function CreditsPage() {
 function CreditsContent() {
   const { isReady, liff, liffError, isLoggedIn, login } = useLiff();
   const searchParams = useSearchParams();
+  // Deep links from LINE nudges carry ?from=out_of_credits|low_credit for analytics.
+  const [source] = useState(() => readNudgeSource(searchParams));
 
   const enabled = isReady && !!liff && !liffError;
   const { data: balance, error: balanceError, mutate: mutateBalance } = useCreditBalance(enabled);
@@ -260,7 +269,11 @@ function CreditsContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 + i * 0.1, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
               >
-                <PackageCard pkg={pkg} onError={(msg) => setToast({ type: "error", message: msg })} />
+                <PackageCard
+                  pkg={pkg}
+                  source={source}
+                  onError={(msg) => setToast({ type: "error", message: msg })}
+                />
               </motion.div>
             ))}
           </div>
@@ -316,9 +329,11 @@ function CreditsContent() {
 // ── Package Card ───────────────────────────────────────────
 const PackageCard = memo(function PackageCard({
   pkg,
+  source,
   onError,
 }: {
   pkg: (typeof PACKAGES)[number];
+  source: string | null;
   onError: (message: string) => void;
 }) {
   const [purchasing, setPurchasing] = useState(false);
@@ -328,7 +343,7 @@ const PackageCard = memo(function PackageCard({
     if (purchasing) return;
     setPurchasing(true);
     try {
-      track("buy_credits_click", { package_id: pkg.id });
+      track("buy_credits_click", source ? { package_id: pkg.id, from: source } : { package_id: pkg.id });
       const result = await createPayment(pkg.id);
       // Redirect to Beam payment page
       window.location.href = result.payment_url;
