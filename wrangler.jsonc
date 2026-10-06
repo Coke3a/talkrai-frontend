@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "talkrai-liff",
+  "account_id": "59baaf69e1e79b5a17da9540ad97ef72",
   "compatibility_date": "2026-09-17",
   "assets": {
     "directory": "./out",
