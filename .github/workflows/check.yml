@@ -1,11 +1,11 @@
-name: Deploy Frontend
+name: Check Frontend
 
 on:
   push:
     branches: [main]
 
 concurrency:
-  group: deploy-frontend
+  group: check-frontend
   cancel-in-progress: true
 
 jobs:
@@ -29,14 +29,3 @@ jobs:
           NEXT_PUBLIC_LIFF_ID: "2009434684-FmIDtNRF"
           NEXT_PUBLIC_API_URL: "https://api.talkrai.app"
 
-  deploy:
-    name: Deploy
-    needs: check
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: superfly/flyctl-actions/setup-flyctl@1.6
-      - name: Deploy to Fly.io
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: flyctl deploy --remote-only

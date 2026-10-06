@@ -74,7 +74,19 @@ app/
 | Variable | Description |
 |---|---|
 | `NEXT_PUBLIC_LIFF_ID` | LIFF ID from LINE Developers Console |
-| `NEXT_PUBLIC_API_BASE_URL` | Backend API URL |
+| `NEXT_PUBLIC_API_URL` | Backend API URL |
+
+## Deployment
+
+Static export (`out/`) served by Cloudflare Workers static assets — worker `talkrai-liff`, custom domain `liff.talkrai.app`. There is no server runtime.
+
+Deployed by Workers Builds (Cloudflare git integration) on push to `main`:
+
+- Build command: `pnpm build`
+- Deploy command: `npx wrangler deploy`
+- Build variables: `NEXT_PUBLIC_LIFF_ID`, `NEXT_PUBLIC_API_URL` (inlined at build time)
+
+GitHub Actions (`.github/workflows/check.yml`) only runs lint + build. Local preview: `pnpm preview`.
 
 ## LINE Mini App Configuration
 
